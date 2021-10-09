@@ -22,7 +22,11 @@ Data Models are essentially a collection of schemas, which describe the format o
 
 They are wrapped in npm packages so that they can be easily reused within different applications.
 
+## Useful Links
 
+[JSON Schema](https://json-schema.org/learn/getting-started-step-by-step.html)
+
+[Ceramic Data Models Registry](https://github.com/ceramicstudio/datamodels)
 
 ## Running The Development Version
 
