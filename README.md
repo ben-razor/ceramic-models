@@ -32,6 +32,12 @@ They are wrapped in npm packages so that they can be easily reused within differ
 
 [JSON Resume Schema](https://jsonresume.org/schema/)
 
+[Schema.org Developers](https://schema.org/docs/developers.html)
+
+[Schema.org Example Action](https://schema.org/AcceptAction)
+
+[https://schema.org/version/latest/schemaorg-current-https.jsonld](https://schema.org/version/latest/schemaorg-current-https.jsonld)
+
 ## Running The Development Version
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
