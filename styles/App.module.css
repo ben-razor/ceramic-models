@@ -1,9 +1,68 @@
 .csnApp {
+    display: flex;
+    flex-direction: column;
     text-align: center;
+}
+
+.csnHeader {
+    padding-top: 60px;
+    font-size: 1.6vw;
+}
+
+.csnTitle {
+    background: -webkit-linear-gradient(hsl(19deg, 100%, 64%) 0%, hsl(19deg, 100%, 64%) 44%,  hsl(13deg, 100%, 50%) 44%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px white;
+    margin: 0;
+}
+
+.csnContent {
+    width: 80%;
+    min-height: 70vh;
+    background-color: hsla(0deg, 0%, 0%, 0.9);
+    box-shadow: 5px 10px 10px hsl(0, 0%, 10%);
+    margin: auto;
+    border-radius: 0.5em;
+    padding: 2em;
+    color: white;
 }
 
 .streamTestPanel {
     border-bottom: 1px solid hsl(0, 0%, 50%);
     padding-bottom: 1em;
     margin-bottom: 1em;
+}
+
+.searchResult {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.searchResultName {
+    width: 22%;
+    padding: 0.2em;
+    margin: 0.3em;
+    background-color: orangered;
+    background-image: linear-gradient(transparent 0%, hsl(19deg, 100%, 60%) 50%, transparent 100%);
+    box-shadow: 4px 0px white;
+    box-sizing: border-box;
+    border-radius: 1em; 
+    cursor: default;
+    user-select: none;
+}
+
+.searchResultName:hover {
+    background-color: orange;
+}
+
+.searchResultName:active {
+    box-shadow: initial;
+}
+
+.searchResultDesc {
+    flex: 1 0;
+    text-align: left;
+    padding: 0.5em;
 }

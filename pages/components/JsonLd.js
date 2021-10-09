@@ -45,12 +45,21 @@ export function matchItemOrArray(elem, predicateCallback) {
             }
         }
     }
+    else if(typeof elem === 'object') {
+        for(let k of Object.keys(elem)) {
+            if(typeof elem[k] === 'string') {
+                if(predicateCallback(elem[k])) {
+                    return true;
+                }
+            }
+        }
+    }
     else {
         if(predicateCallback(elem)) return true;
     }
 }
 
-export function transformObject(objectName, data) {
+export function getObjectFeatures(objectName, data) {
     let graph = data["@graph"];
     let schemaSelector = `schema:${objectName}`;
 
@@ -58,12 +67,26 @@ export function transformObject(objectName, data) {
 
     let fields;
     if(baseItem) {
-        fields = graph.filter(x => matchItemOrArray(x["schema:domainIncludes"], x => x['@id'] === schemaSelector));
+        fields = graph.filter(x => matchItemOrArray(x["schema:domainIncludes"], val => {
+            if(val) {
+                val['@id'] === schemaSelector;
+            }
+        }));
     }
 
     let subClass = baseItem['rdfs:subClassOf'];
 
     return { baseItem, fields, subClass };
+}
+
+/**
+ * Convert an object that was created from jsonld to json schema format.
+ * 
+ * @param {object} jsonLdObj 
+ * @param {object} options 
+ */
+export function JsonLdToJsonSchema(jsonLdObj, options) {
+
 }
 
 /**
