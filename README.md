@@ -28,6 +28,10 @@ They are wrapped in npm packages so that they can be easily reused within differ
 
 [Ceramic Data Models Registry](https://github.com/ceramicstudio/datamodels)
 
+[Example Basic Models Schema](https://github.com/ceramicstudio/datamodels/blob/main/packages/identity-profile-basic/schemas/BasicProfile.json)
+
+[JSON Resume Schema](https://jsonresume.org/schema/)
+
 ## Running The Development Version
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
