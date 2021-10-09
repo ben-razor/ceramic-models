@@ -8,6 +8,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { DID } from 'dids'
 import DataModels from './components/DataModels';
 import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema } from './components/JsonLd';
+import { prettyPrintJson } from 'pretty-print-json';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
@@ -44,7 +45,9 @@ function SchemaOrg() {
           let idMatch = matchItemOrArray(x['@id'], val => val.includes(searchQuery))
 
           let descMatch = matchItemOrArray(x['rdfs:comment'], val => {
-            return val.includes(searchQuery)
+            if(typeof val === 'string') {
+              return val.includes(searchQuery)
+            }
           });
           return idMatch || descMatch;
         })
@@ -127,7 +130,7 @@ function SchemaOrg() {
     }
     let foundResults = typeSearchResults.length > 0;
 
-    return <div className="sorgTypeSearchPanel">
+    return <div className={styles.sorgTypeSearchPanel}>
       <div>
         { getSearchForm() }
       </div>
@@ -137,36 +140,63 @@ function SchemaOrg() {
     </div>
   }
 
+  function goBack() {
+    setJSONSchema('');
+    setSelectedObject('');
+  }
+
   function getSelectedObject() {
 
+  }
+
+  function getPageContent() {
+    let content;
+
+    let searchPage = <div className="csnSearchPage">
+      <div>
+        {getDataPanel()}
+      </div>
+      <div>
+        {getTypeSearchPanel()}
+      </div>
+    </div>;
+
+    let schemaPage = <div className={styles.csnSchemaPage}>
+      <div>
+        <div className={styles.csnControlsPanel}>
+          <button onClick={(e) => goBack()}>&lArr; Back</button>
+        </div>
+        <div className={styles.csnJSON}>
+          { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
+        </div>
+      </div>
+    </div>;
+
+    if(jsonSchema) {
+      content = schemaPage;
+    }
+    else {
+      content = searchPage;
+    }
+
+    return content;
   }
 
   return (
     <div className={styles.csnApp}> 
       <div className={styles.csnHeader}>
-        <h2 className={styles.csnSubTitle}>
-          schema.org &rArr; JSON Schema &rArr; Ceramic Data Models
-        </h2>
-        <div>
-          <Image alt="Ceramic Logo" src="/azulejo/ceramic-logo-200x200-1.png" width="50" height="50" />
-        </div>
         <h1 className={styles.csnTitle}>
           AZULEJO
         </h1>
-      </div>
-      <div className="csnSchemaPage">
         <div>
-          { JSON.stringify(jsonSchema) }
+          <Image alt="Ceramic Logo" src="/azulejo/ceramic-logo-200x200-1.png" width="50" height="50" />
         </div>
+        <h2 className={styles.csnSubTitle}>
+          schema.org &rArr; JSON Schema &rArr; Ceramic Data Models
+        </h2>
       </div>
       <div className={styles.csnContent}>
-        <div>
-          {getDataPanel()}
-        </div>
-        <div>
-          {getTypeSearchPanel()}
-        </div>
-  
+        { getPageContent() }
       </div>
    </div>
   );

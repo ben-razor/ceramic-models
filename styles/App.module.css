@@ -34,6 +34,10 @@
     color: white;
 }
 
+.csnControlsPanel {
+    text-align: left;
+}
+
 .streamTestPanel {
     border-bottom: 1px solid hsl(0, 0%, 50%);
     padding-bottom: 1em;
@@ -71,4 +75,23 @@
     flex: 1 0;
     text-align: left;
     padding: 0.5em;
+}
+
+.csnJSON {
+    background-color:hsla(30, 100%, 10%, 1);
+    border: 2px solid black;
+    color: white;
+    padding: 1em;
+    border-radius: 1em;
+    white-space: pre-wrap;
+    margin-top: 0.5em;
+    width: 70%;
+}
+
+.csnSchemaPage {
+    text-align: left;
+}
+
+.sorgTypeSearchPanel {
+    text-align: center;
 }

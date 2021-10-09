@@ -48,7 +48,7 @@ export function matchItemOrArray(elem, predicateCallback) {
     else if(typeof elem === 'object') {
         for(let k of Object.keys(elem)) {
             if(typeof elem[k] === 'string') {
-                if(predicateCallback(elem[k])) {
+                if(predicateCallback(elem)) {
                     return true;
                 }
             }
@@ -69,7 +69,7 @@ export function getObjectFeatures(objectName, data) {
     if(baseItem) {
         fields = graph.filter(x => matchItemOrArray(x["schema:domainIncludes"], val => {
             if(val) {
-                val['@id'] === schemaSelector;
+                return val['@id'] === schemaSelector;
             }
         }));
     }
@@ -104,6 +104,35 @@ export function jsonLdToJsonSchema(objectName, data, options) {
         "definitions": {
 
         }
+    }
+
+    for(let field of fields) {
+        let subObjectName = field['@id'].split(':')[1];
+        console.log(subObjectName);
+        let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data);
+
+        let rangeIncludes = baseItemSub['schema:rangeIncludes'];
+
+        let type = '';
+
+        // TODO Get multiple range includes (more than one option for field type)
+        if(rangeIncludes) {
+            let rangeInclude = rangeIncludes;
+            if(Array.isArray(rangeInclude)) {
+                let i = 0;
+                rangeInclude = rangeIncludes[i];
+            }
+            let rangeIncludeId = rangeInclude['@id'];
+            let rangeIncludeName = rangeIncludeId.split(':')[1];
+            let {baseItem: baseItemRange, fields: fieldsRange, subClass: subClassRange} = getObjectFeatures(rangeIncludeName, data);
+
+            type = rangeIncludeId;
+            if(Array.isArray(baseItemRange['@type']) && baseItemRange['@type'].includes("schema:DataType")) {
+                type = baseItemRange['rdfs:label'];
+            }
+        }
+
+        jsonSchemaObj["properties"][subObjectName] = JSON.stringify(type);
     }
 
     return jsonSchemaObj;
