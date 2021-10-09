@@ -42,11 +42,11 @@ function SchemaOrg() {
 
       if(searchQuery) {
         _typeSearchResults = _typeSearchResults.filter(x => {
-          let idMatch = matchItemOrArray(x['@id'], val => val.includes(searchQuery))
+          let idMatch = matchItemOrArray(x['@id'], val => val.toLowerCase().includes(searchQuery))
 
           let descMatch = matchItemOrArray(x['rdfs:comment'], val => {
             if(typeof val === 'string') {
-              return val.includes(searchQuery)
+              return val.toLowerCase().includes(searchQuery)
             }
           });
           return idMatch || descMatch;
@@ -101,7 +101,7 @@ function SchemaOrg() {
   function getSearchForm() {
     return <form onSubmit={handleTypeFormSubmit}>
       <input type="text" value={searchQuery} 
-             onChange={e => setSearchQuery(e.target.value)} 
+             onChange={e => setSearchQuery(e.target.value.toLowerCase())} 
              placeholder="Search Object Type..." />
     </form>;
   }
@@ -189,7 +189,7 @@ function SchemaOrg() {
           AZULEJO
         </h1>
         <div>
-          <Image alt="Ceramic Logo" src="/azulejo/ceramic-logo-200x200-1.png" width="50" height="50" />
+          <Image alt="Ceramic Logo" src="/azulejo/ceramic-logo-200x200-1.png" width="32" height="32" />
         </div>
         <h2 className={styles.csnSubTitle}>
           schema.org &rArr; JSON Schema &rArr; Ceramic Data Models

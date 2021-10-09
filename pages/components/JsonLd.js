@@ -114,6 +114,8 @@ export function jsonLdToJsonSchema(objectName, data, options) {
         let rangeIncludes = baseItemSub['schema:rangeIncludes'];
 
         let type = '';
+        let rangeIncludeId = '';
+        let comment = '';
 
         // TODO Get multiple range includes (more than one option for field type)
         if(rangeIncludes) {
@@ -122,17 +124,51 @@ export function jsonLdToJsonSchema(objectName, data, options) {
                 let i = 0;
                 rangeInclude = rangeIncludes[i];
             }
-            let rangeIncludeId = rangeInclude['@id'];
+            rangeIncludeId = rangeInclude['@id'];
             let rangeIncludeName = rangeIncludeId.split(':')[1];
             let {baseItem: baseItemRange, fields: fieldsRange, subClass: subClassRange} = getObjectFeatures(rangeIncludeName, data);
+            comment = baseItemRange['rdfs:comment'];
 
             type = rangeIncludeId;
             if(Array.isArray(baseItemRange['@type']) && baseItemRange['@type'].includes("schema:DataType")) {
-                type = baseItemRange['rdfs:label'];
+                type = baseItemRange['rdfs:label'].toLowerCase();
             }
         }
 
-        jsonSchemaObj["properties"][subObjectName] = JSON.stringify(type);
+        let jsonSchemaType = 'object';
+        let format;
+
+        if(type) {
+            if(type === 'text') {
+                jsonSchemaType = 'string';
+            }
+            else if(type === 'datetime') {
+                jsonSchemaType = 'string';
+                format = 'date-time';
+            }
+            else if(type === 'time') {
+                jsonSchemaType = 'string';
+                format = 'time';
+            }
+            else if(type === 'date') {
+                jsonSchemaType = 'string';
+                format = 'date';
+            }
+        }
+
+        let propertyObj = {
+            'type': jsonSchemaType
+        };
+
+        if(comment && typeof comment === 'string') {
+            propertyObj['description'] = comment;
+        }
+
+        if(format) {
+            propertyObj['format'] = format;
+        }
+
+        jsonSchemaObj["properties"][subObjectName] = propertyObj;
     }
 
     return jsonSchemaObj;
