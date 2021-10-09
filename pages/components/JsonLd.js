@@ -71,14 +71,22 @@ export function transformObject(objectName, data) {
  * 
  * @param {string} type Class|Property or name of another schema
  */
-export function getByType(type) {
+export function getByType(type, data) {
     let graph = data["@graph"];
     let items = graph.filter(x => {
-        let type = x['@type'];
-        let name = type.split(':').slice(1);
-
-        if(name === type) return true;
-        else return false;
+        let typeField = x['@type'];
+        if(typeField) {
+            let matchResult = matchItemOrArray(typeField, item => {
+                let typeParts = item.split(':');
+                let name;
+                if(typeParts.length > 1) {
+                    name = item.split(':').slice(1)[0];
+                }
+                if(name === type) return true;
+                else return false;
+            });
+            return matchResult;
+        }
     });
     return items;
 }

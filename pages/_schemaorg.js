@@ -14,6 +14,9 @@ function SchemaOrg() {
   const [dataLoaded, setDataLoaded] = useState();
   const [dataLoadError, setDataLoadError] = useState();
   const [data, setData] = useState();
+  const [enteredType, setEnteredType] = useState('');
+  const [type, setType] = useState('');
+  const [typeSearchResults, setTypeSearchResults] = useState([]);
 
   useEffect(() => {
     (async() => {
@@ -27,10 +30,49 @@ function SchemaOrg() {
 
   }, []);
 
+  useEffect(() => {
+    if(data && type) {
+      let _typeSearchResults = getByType(type, data);
+      setTypeSearchResults(_typeSearchResults);
+    }
+  }, [data, type]);
+
   function getDataPanel() {
     return <div className="sorgDataPanel">
       { dataLoaded ? 'Loaded' : 'Data not loaded' } 
     </div>;
+  }
+
+  function handleTypeFormSubmit(e) {
+    setType(enteredType);
+    e.preventDefault();
+  }
+
+  function jstr(val) {
+    return JSON.stringify(val);
+  }
+
+  function getTypeSearchPanel() {
+    let typeSearchResultsUI = [];
+    for(let val of typeSearchResults) {
+      typeSearchResultsUI.push(
+        <div className="sorgTypeSearchResult">
+          { jstr(val) }
+        </div>
+      )
+    }
+    return <div className="sorgTypeSearchPanel">
+      <form onSubmit={handleTypeFormSubmit}>
+        <label>
+          Object type:
+          <input type="text" value={enteredType} onChange={e => setEnteredType(e.target.value)} />
+        </label>
+        <input type="submit" value="Go" />
+      </form>
+      <div className="sorgTypeSearchResults">
+        { typeSearchResultsUI }
+      </div>
+    </div>
   }
 
   return (
@@ -38,6 +80,9 @@ function SchemaOrg() {
       Schema Org!
       <div>
         {getDataPanel()}
+      </div>
+      <div>
+        {getTypeSearchPanel()}
       </div>
     </div>
   );
