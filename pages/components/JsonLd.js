@@ -63,7 +63,7 @@ export function getObjectFeatures(objectName, data) {
     let graph = data["@graph"];
     let schemaSelector = `schema:${objectName}`;
 
-    let baseItem = graph.filter(x => x['@id'] === schemaSelector);
+    let baseItem = graph.filter(x => x['@id'] === schemaSelector)[0];
 
     let fields;
     if(baseItem) {
@@ -85,8 +85,28 @@ export function getObjectFeatures(objectName, data) {
  * @param {object} jsonLdObj 
  * @param {object} options 
  */
-export function JsonLdToJsonSchema(jsonLdObj, options) {
+export function jsonLdToJsonSchema(objectName, data, options) {
+    let {baseItem, fields, subClass} = getObjectFeatures(objectName, data);
 
+    let comment = baseItem['rdfs:comment'];
+    if(typeof comment === 'object') {
+        comment = JSON.stringify(comment);
+    }
+
+    let jsonSchemaObj = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": objectName,
+        "description": comment,
+        "type": "object",
+        "properties": {
+
+        },
+        "definitions": {
+
+        }
+    }
+
+    return jsonSchemaObj;
 }
 
 /**

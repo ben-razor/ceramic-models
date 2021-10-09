@@ -7,9 +7,10 @@ import { ThreeIdConnect,  EthereumAuthProvider } from '@3id/connect'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { DID } from 'dids'
 import DataModels from './components/DataModels';
-import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures } from './components/JsonLd';
+import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema } from './components/JsonLd';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
+const MAX_RESULTS = 20;
 
 function SchemaOrg() {
   const [dataLoaded, setDataLoaded] = useState();
@@ -20,6 +21,7 @@ function SchemaOrg() {
   const [typeSearchResults, setTypeSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
+  const [jsonSchema, setJSONSchema] = useState('');
 
   useEffect(() => {
     (async() => {
@@ -41,7 +43,6 @@ function SchemaOrg() {
         _typeSearchResults = _typeSearchResults.filter(x => {
           let idMatch = matchItemOrArray(x['@id'], val => val.includes(searchQuery))
 
-          console.log(x['rdfs:comment'], 'type: ', typeof x['rdfs:comment']);
           let descMatch = matchItemOrArray(x['rdfs:comment'], val => {
             return val.includes(searchQuery)
           });
@@ -56,9 +57,11 @@ function SchemaOrg() {
   useEffect(() => {
     if(selectedObject && data) {
       let { baseItem, fields, subClass } = getObjectFeatures(selectedObject, data)
-      console.log(baseItem);
-      console.log(fields);
-      console.log(subClass);
+      console.log('base', baseItem);
+      console.log('domainIncludes', fields);
+      console.log('subClass', subClass);
+      let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data);
+      setJSONSchema(_jsonSchemaObj);
     }
   }, [selectedObject, data]);
 
@@ -94,11 +97,9 @@ function SchemaOrg() {
 
   function getSearchForm() {
     return <form onSubmit={handleTypeFormSubmit}>
-      <label>
-        Search:
-        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-      </label>
-      <input type="submit" value="Go" />
+      <input type="text" value={searchQuery} 
+             onChange={e => setSearchQuery(e.target.value)} 
+             placeholder="Search Object Type..." />
     </form>;
   }
 
@@ -112,10 +113,12 @@ function SchemaOrg() {
         comment = jstr(comment);
       }
       typeSearchResultsUI.push(
-        <div className={styles.searchResult}>
-          <div className={styles.searchResultName}>
-            <a onClick={e => selectObject(name)}>{name}</a>
-          </div>
+        <div className={styles.searchResult} key={name}>
+          <a onClick={e => selectObject(name)} className={styles.searchResultName}>
+            <div>
+              {name}
+            </div>
+          </a>
           <div className={styles.searchResultDesc}>
             {comment}
           </div>
@@ -141,12 +144,20 @@ function SchemaOrg() {
   return (
     <div className={styles.csnApp}> 
       <div className={styles.csnHeader}>
+        <h2 className={styles.csnSubTitle}>
+          schema.org &rArr; JSON Schema &rArr; Ceramic Data Models
+        </h2>
         <div>
           <Image alt="Ceramic Logo" src="/azulejo/ceramic-logo-200x200-1.png" width="50" height="50" />
         </div>
         <h1 className={styles.csnTitle}>
           AZULEJO
         </h1>
+      </div>
+      <div className="csnSchemaPage">
+        <div>
+          { JSON.stringify(jsonSchema) }
+        </div>
       </div>
       <div className={styles.csnContent}>
         <div>
