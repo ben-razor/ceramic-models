@@ -244,6 +244,7 @@ export function jsonLdToJsonSchema(objectName, data, options, context={}) {
 
         if(jsonSchemaType === 'object') {
             let recursionLevel = context?.recursionLevel || 0;
+            context.recursionPath = context?.recursionPath || [fieldId];
             let fullyRecursed = true;
 
             if(options.recursionLevels && recursionLevel < options.recursionLevels) {
@@ -266,15 +267,19 @@ export function jsonLdToJsonSchema(objectName, data, options, context={}) {
                 let propertyName = propertyId.split(':')[1];
 
                 context.recursionLevel = recursionLevel + 1;
+                context.recursionPath.push(propertyId);
                 let propertySchemaObj = jsonLdToJsonSchema(propertyName, data, options, context);
                 context.recursionLevel = context.recursionLevel - 1;
+
                 if(propertySchemaObj && propertySchemaObj.properties) {
                     propertyObj['properties'] = propertySchemaObj.properties;
                 }
                 else {
                     propertyObj['properties'] = propertyId;
                 }
+                context.recursionPath.pop();
             }
+
        }
 
         if(comment && typeof comment === 'string') {

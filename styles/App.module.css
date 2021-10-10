@@ -102,7 +102,7 @@
 
 .csnSchemaControls {
     border: 2px solid hsl(13deg, 100%, 50%);
-    background-color: hsl(30deg, 80%, 40%);
+    background-color: hsl(30deg, 40%, 30%);
     border-radius: 1em;
     margin-top: 0.5em;
     margin-left: 0.5em;
@@ -125,6 +125,10 @@
 
 .csnSchemaProperty {
     font-weight: bold;
+}
+
+.csnSchemaExpander {
+    cursor: pointer;
 }
 
 .csnSchemaLevel {

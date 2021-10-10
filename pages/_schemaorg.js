@@ -186,17 +186,19 @@ function SchemaOrg() {
 
     if(properties) {
       for(let property of Object.keys(properties)) {
+        context.recursionPath.push(property);
         let propertyInfo = properties[property];
+        let propertyPath = context.recursionPath.join('/');
 
         let hasChildProperties = propertyInfo.properties && 
                                  typeof propertyInfo.properties === 'object' &&
                                  Object.keys(propertyInfo.properties).length > 0;
 
-        let isExpanded = options.expanded && options.expanded[property];
+        let isExpanded = options.expanded && options.expanded[propertyPath];
 
         propertyUIThisLevel.push(<div className={styles.csnSchemaProperty}>
           { hasChildProperties ? (
-              <a onClick={ e => setExpanded(property, !isExpanded) }>
+              <a onClick={ e => setExpanded(propertyPath, !isExpanded) } className={styles.csnSchemaExpander}>
                 { !isExpanded ? <span>&#x25B2;</span> : <span>&#x25BC;</span> }
               </a>
             ) : (
@@ -204,7 +206,7 @@ function SchemaOrg() {
             )
           }
           <input type="checkbox"></input>
-          {property}
+          {property} - {propertyPath}
         </div>);
         
         if(options.showDescriptions) {
@@ -223,6 +225,7 @@ function SchemaOrg() {
           context.recursionLevel = level + 1;
           let propertyUINextLevel = [];
           doPropertyDisplayRecursion(propertyUINextLevel, propertyInfo.properties, options, context);
+          
 
           let subListStyle = {display: 'block'};
           if(!isExpanded) {
@@ -236,6 +239,7 @@ function SchemaOrg() {
 
           context.recursionLevel = context.recursionLevel - 1;
         }
+        context.recursionPath.pop();
       }
     }
 
@@ -247,7 +251,10 @@ function SchemaOrg() {
   function displaySchema(jsonSchema, options={}) {
     let propertyUI = [];
 
-    let context = { recursionLevel: 0 };
+    let context = { 
+      recursionLevel: 0,
+      recursionPath: []
+    };
 
     if(jsonSchema.properties) {
       doPropertyDisplayRecursion(propertyUI, jsonSchema.properties, options, context);
