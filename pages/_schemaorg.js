@@ -31,6 +31,8 @@ function SchemaOrg() {
   const [editingField, setEditingField] = useState();
   const [editingFieldType, setEditingFieldType] = useState('');
   const [editingFieldPattern, setEditingFieldPattern] = useState('');
+  const [editingFieldMinLength, setEditingFieldMinLength] = useState('');
+  const [editingFieldMaxLength, setEditingFieldMaxLength] = useState('');
   const [editingFieldRequired, setEditingFieldRequired] = useState(false);
   const [editedFieldDetails, setEditedFieldDetails] = useState({});
 
@@ -143,6 +145,8 @@ function SchemaOrg() {
       if(curProperties) { 
         if(details.type) curProperties['type'] = details.type; 
         if(details.pattern) curProperties['pattern'] = details.pattern;
+        if(details.minLength) curProperties['minLength'] = details.minLength;
+        if(details.maxLength) curProperties['maxLength'] = details.maxLength;
         if(details.required) {
           if(!schema.required) {
             curProperties.required = [];
@@ -416,10 +420,10 @@ function SchemaOrg() {
       path: editingField,
       type: editingFieldType,
       pattern: editingFieldPattern,
-      required: editingFieldRequired
+      required: editingFieldRequired,
+      minLength: editingFieldMinLength,
+      maxLength: editingFieldMaxLength,
     }
-    //const [editingFieldPattern, setEditingFieldPattern] = useState();
-    //const [editingFieldRequired, setEditingFieldRequired] = useState();
     setEditedFieldDetails(details);
     e.preventDefault();
   }
@@ -512,13 +516,30 @@ function SchemaOrg() {
                     </div>
                   </div>
 
-
                   <div className={styles.csnSchemaSettingRow}>
                     <div className={styles.csnSchemaSettingLabel}>
                       Required 
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
                       <input type="checkbox" onChange={e => setEditingFieldRequired(e.target.checked)} />
+                    </div>
+                  </div>
+
+                  <div className={styles.csnSchemaSettingRow}>
+                    <div className={styles.csnSchemaSettingLabel}>
+                     MinLength 
+                    </div>
+                    <div className={styles.csnSchemaSettingControl}>
+                      <input type="text" value={editingFieldMinLength} onChange={e => setEditingFieldMinLength(e.target.value)} />
+                    </div>
+                  </div>
+
+                  <div className={styles.csnSchemaSettingRow}>
+                    <div className={styles.csnSchemaSettingLabel}>
+                      MaxLength 
+                    </div>
+                    <div className={styles.csnSchemaSettingControl}>
+                      <input type="text" value={editingFieldMaxLength} onChange={e => setEditingFieldMaxLength(e.target.value)} />
                     </div>
                   </div>
 
