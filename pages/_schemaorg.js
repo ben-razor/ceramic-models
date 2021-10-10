@@ -23,6 +23,7 @@ function SchemaOrg() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
+  const [options, setOptions] = useState({});
 
   useEffect(() => {
     (async() => {
@@ -59,11 +60,7 @@ function SchemaOrg() {
 
   useEffect(() => {
     if(selectedObject && data) {
-      let { baseItem, fields, subClass } = getObjectFeatures(selectedObject, data)
-      console.log('base', baseItem);
-      console.log('domainIncludes', fields);
-      console.log('subClass', subClass);
-      let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data);
+      let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data, options);
       setJSONSchema(_jsonSchemaObj);
     }
   }, [selectedObject, data]);
@@ -143,10 +140,6 @@ function SchemaOrg() {
   function goBack() {
     setJSONSchema('');
     setSelectedObject('');
-  }
-
-  function getSelectedObject() {
-
   }
 
   function getPageContent() {

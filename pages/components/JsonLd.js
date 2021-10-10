@@ -59,7 +59,27 @@ export function matchItemOrArray(elem, predicateCallback) {
     }
 }
 
-export function getObjectFeatures(objectName, data) {
+function getSubclassFields(startSubClass, data, options) {
+    let initSubClassID = startSubClass['@id'];
+    let initSubClassName = initSubClassID.split(':')[1];
+
+    let {baseItem, fields, subClass} = getObjectFeatures(initSubClassName, data, options);
+
+    let allSubClassFields = fields;
+
+    let nextSubClass = subClass;
+    while(nextSubClass) {
+        let nextSubClassID = nextSubClass['@id'];
+        let nextSubClassName = nextSubClassID.split(':')[1];
+        let {baseItem: nextBaseItem, fields: nextFields, subClass: newNextSubclass} = getObjectFeatures(nextSubClassName, data, options);
+        allSubClassFields = allSubClassFields.concat(nextFields);
+        nextSubClass = newNextSubclass;
+    }
+
+    return allSubClassFields;
+}
+
+export function getObjectFeatures(objectName, data, options) {
     let graph = data["@graph"];
     let schemaSelector = `schema:${objectName}`;
 
@@ -86,7 +106,11 @@ export function getObjectFeatures(objectName, data) {
  * @param {object} options 
  */
 export function jsonLdToJsonSchema(objectName, data, options) {
-    let {baseItem, fields, subClass} = getObjectFeatures(objectName, data);
+    let {baseItem, fields: ownFields, subClass} = getObjectFeatures(objectName, data, options);
+
+    let subClassFields = getSubclassFields(subClass, data, options);
+
+    let fields = ownFields.concat(subClassFields);
 
     let comment = baseItem['rdfs:comment'];
     if(typeof comment === 'object') {
@@ -109,7 +133,7 @@ export function jsonLdToJsonSchema(objectName, data, options) {
     for(let field of fields) {
         let subObjectName = field['@id'].split(':')[1];
         console.log(subObjectName);
-        let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data);
+        let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data, options);
 
         let rangeIncludes = baseItemSub['schema:rangeIncludes'];
 
@@ -126,7 +150,7 @@ export function jsonLdToJsonSchema(objectName, data, options) {
             }
             rangeIncludeId = rangeInclude['@id'];
             let rangeIncludeName = rangeIncludeId.split(':')[1];
-            let {baseItem: baseItemRange, fields: fieldsRange, subClass: subClassRange} = getObjectFeatures(rangeIncludeName, data);
+            let {baseItem: baseItemRange, fields: fieldsRange, subClass: subClassRange} = getObjectFeatures(rangeIncludeName, data, options);
             comment = baseItemRange['rdfs:comment'];
 
             type = rangeIncludeId;
@@ -161,7 +185,9 @@ export function jsonLdToJsonSchema(objectName, data, options) {
         };
 
         if(comment && typeof comment === 'string') {
-            propertyObj['description'] = comment;
+            if(options.showDescription) {
+                propertyObj['description'] = comment;
+            }
         }
 
         if(format) {
