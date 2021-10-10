@@ -103,9 +103,11 @@ export function getObjectFeatures(objectName, data, options) {
  * Convert an object that was created from jsonld to json schema format.
  * 
  * @param {object} jsonLdObj 
+ * @param {object} data           The json data obj from schema.org
  * @param {object} options 
+ * @param {object} context        An object for passing info down the tree
  */
-export function jsonLdToJsonSchema(objectName, data, options) {
+export function jsonLdToJsonSchema(objectName, data, options, context) {
     let {baseItem, fields: ownFields, subClass} = getObjectFeatures(objectName, data, options);
 
     let fields = ownFields;
@@ -134,7 +136,8 @@ export function jsonLdToJsonSchema(objectName, data, options) {
     }
 
     for(let field of fields) {
-        let subObjectName = field['@id'].split(':')[1];
+        let fieldId = field['@id'];
+        let subObjectName = fieldId.split(':')[1];
         let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data, options);
 
         let rangeIncludes = baseItemSub['schema:rangeIncludes'];
@@ -186,8 +189,41 @@ export function jsonLdToJsonSchema(objectName, data, options) {
             'type': jsonSchemaType
         };
 
+        if(jsonSchemaType === 'object') {
+            let recursionLevel = context?.recursionLevel || 0;
+            let fullyRecursed = true;
+
+            if(options.recursionLevels && recursionLevel < options.recursionLevels) {
+                fullyRecursed = false;
+            }
+
+            if(fullyRecursed) {
+                propertyObj['properties'] = fieldId;
+            }
+            
+            else {
+                let propertyRangeIncludes = field['schema:rangeIncludes'];
+                let propertyId;
+                if(Array.isArray(propertyRangeIncludes)) {
+                    propertyId = propertyRangeIncludes[0]['@id'];
+                }
+                else {
+                    propertyId = propertyRangeIncludes['@id'];
+                }
+                let propertyName = propertyId.split(':')[1];
+
+                let propertySchemaObj = jsonLdToJsonSchema(propertyName, data, options, { recursionLevel: recursionLevel + 1 })
+                if(propertySchemaObj && propertySchemaObj.properties) {
+                    propertyObj['properties'] = propertySchemaObj.properties;
+                }
+                else {
+                    propertyObj['properties'] = propertyId;
+                }
+            }
+       }
+
         if(comment && typeof comment === 'string') {
-            if(options.showDescription) {
+            if(options.showDescriptions) {
                 propertyObj['description'] = comment;
             }
         }

@@ -85,13 +85,39 @@
     border-radius: 1em;
     white-space: pre-wrap;
     margin-top: 0.5em;
-    width: 70%;
 }
 
 .csnSchemaPage {
     text-align: left;
 }
 
+.csnSchemaContent {
+    display: flex;
+    flex-direction: row;
+}
+
+.csnSchemaDisplay {
+    width: 70%;
+}
+
+.csnSchemaControls {
+    border: 2px solid hsl(13deg, 100%, 50%);
+    border-radius: 1em;
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    padding: 0.5em;
+    width: 30%;
+}
+
 .sorgTypeSearchPanel {
     text-align: center;
+}
+
+.csnSchemaSettingRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.csnSchemaSettingLabel {
+    width: 60%;
 }

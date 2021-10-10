@@ -25,6 +25,10 @@ function SchemaOrg() {
   const [jsonSchema, setJSONSchema] = useState('');
   const [options, setOptions] = useState({});
 
+  const [showDescriptions, setShowDescriptions] = useState(false);
+  const [useSubClasses, setUseSubClasses] = useState(false);
+  const [recursionLevels, setRecursionLevels] = useState(0);
+
   useEffect(() => {
     (async() => {
       let { success, data, error } = await getSchema();
@@ -63,7 +67,7 @@ function SchemaOrg() {
       let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data, options);
       setJSONSchema(_jsonSchemaObj);
     }
-  }, [selectedObject, data]);
+  }, [selectedObject, data, options]);
 
   function selectObject(name) {
     console.log(name);
@@ -142,6 +146,30 @@ function SchemaOrg() {
     setSelectedObject('');
   }
 
+  function changeSettingShowDesc(val) {
+    let newOptions = {...options};
+    newOptions['showDescriptions'] = val;
+    console.log(val);
+    setShowDescriptions(val);
+    setOptions(newOptions);
+  }
+
+  function changeSettingUseSubClasses(val) {
+    let newOptions = {...options};
+    newOptions['useSubClasses'] = val;
+    setUseSubClasses(val);
+    setOptions(newOptions);
+  }
+
+  function changeSettingRecursionLevels(val) {
+    val = parseInt(val, 10);
+    let newOptions = {...options};
+    newOptions['recursionLevels'] = val;
+    console.log('rec levels', val);
+    setRecursionLevels(val);
+    setOptions(newOptions);
+  }
+  
   function getPageContent() {
     let content;
 
@@ -159,8 +187,39 @@ function SchemaOrg() {
         <div className={styles.csnControlsPanel}>
           <button onClick={(e) => goBack()}>&lArr; Back</button>
         </div>
-        <div className={styles.csnJSON}>
-          { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
+        <div className={styles.csnSchemaContent}>
+          <div className={styles.csnSchemaDisplay}>
+            <div className={styles.csnJSON}>
+              { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
+            </div>
+          </div>
+          <div className={styles.csnSchemaControls}>
+            <h3>Schema Controls</h3>
+            <form>
+              <div className={styles.csnSchemaSettingRow}>
+                <div className={styles.csnSchemaSettingLabel}>
+                  Show descriptions:
+                </div>
+                <input type="checkbox" value={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
+              </div>
+              <div className={styles.csnSchemaSettingRow}>
+                <div className={styles.csnSchemaSettingLabel}>
+                  Use sub class fields:
+                </div>
+                <input type="checkbox" value={useSubClasses} onChange={e => changeSettingUseSubClasses(e.target.checked)} />
+              </div>
+              <div className={styles.csnSchemaSettingRow}>
+                <div className={styles.csnSchemaSettingLabel}>
+                  Recursion levels:
+                </div>
+                <select value={recursionLevels} onChange={e => changeSettingRecursionLevels(e.target.value)}>
+                  <option value="0">0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>;
