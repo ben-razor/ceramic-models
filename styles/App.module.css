@@ -24,7 +24,7 @@
 }
 
 .csnContent {
-    width: 80%;
+    width: 90%;
     min-height: 70vh;
     background-color: hsla(30, 100%, 20%, 0.84);
     box-shadow: 0px 10px 10px hsl(0, 0%, 50%);
@@ -35,7 +35,8 @@
 }
 
 .csnControlsPanel {
-    text-align: left;
+    display: flex;
+    justify-content: space-between;
 }
 
 .streamTestPanel {
@@ -119,10 +120,15 @@
 .csnSchemaSettingRow {
     display: flex;
     flex-direction: row;
+    padding-bottom: 0.3em;
 }
 
 .csnSchemaSettingLabel {
-    width: 60%;
+    width: 50%;
+}
+
+.csnSchemaSettingControl {
+    width: 50%;
 }
 
 .csnSchemaProperty {
@@ -155,4 +161,24 @@
 .csnTextEllipsis {
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.csnJSONEditor {
+    display: flex;
+    margin-top: 1em;
+}
+
+.csnJSONPropEditor {
+    flex: 1 1;
+    width: 33%
+}
+
+.csnJSONEditorDisplay {
+    flex: 2 0;
+    width: 66%;
+    background-color: black;
+    border-radius: 0.5em;
+    border: 1px solid white;
+    padding: 0.5em;
+    margin-left: 1em;
 }

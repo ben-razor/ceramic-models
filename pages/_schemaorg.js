@@ -25,8 +25,10 @@ function SchemaOrg() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
-  const [jsonSchemaPropertyLimited, setJSONSchemaPropertyLimited] = useState('');
+  const [jsonSchemaWithFieldsChosen, setJSONSchemaWithFieldsChosen] = useState('');
   const [options, setOptions] = useState({ expanded: {}, selectedFields: {} });
+  const [fieldsChosen, setFieldsChosen] = useState(false);
+  const [editingField, setEditingField] = useState();
 
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [useSubClasses, setUseSubClasses] = useState(false);
@@ -85,7 +87,7 @@ function SchemaOrg() {
         copyObjectProperties(jsonSchema.properties, _jsonSchema.properties, pathParts);
       }
 
-      console.log(_jsonSchema);
+      setJSONSchemaWithFieldsChosen(_jsonSchema);
     }
 
   }, [jsonSchema, options.selectedFields]);
@@ -203,6 +205,10 @@ function SchemaOrg() {
     setSelectedObject('');
   }
 
+  function goFieldsSelected() {
+    setFieldsChosen(true);
+  }
+
   function changeSettingShowDesc(val) {
     let newOptions = {...options};
     newOptions['showDescriptions'] = val;
@@ -279,7 +285,9 @@ function SchemaOrg() {
             )
           }
           <input type="checkbox" value={options.selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
-          {property} - {propertyPath}
+          <span onClick={e => setEditingField(propertyPath)}>
+            {property}
+          </span>
         </div>);
         
         if(options.showDescriptions) {
@@ -321,6 +329,17 @@ function SchemaOrg() {
     return propertyUI;
   }
 
+  function getEditingFieldDetails(path) {
+    if(jsonSchema && path) {
+      let pathParts = path.split('/');
+      let curProperties = jsonSchema.properties;
+      for(let part of pathParts) {
+        curProperties = curProperties[part]
+      }
+      return curProperties;
+    }
+  }
+
   function displaySchema(jsonSchema, options={}) {
     let propertyUI = [];
 
@@ -336,7 +355,12 @@ function SchemaOrg() {
     return <div>
       <h3>{jsonSchema['title']}</h3>
       <div>{processDescription(jsonSchema['description'])}</div>
-      <div>{propertyUI}</div>
+      <div className={styles.csnJSONEditor}>
+        <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
+        <div className={styles.csnJSONEditorDisplay}>
+          { JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"') } 
+        </div>
+      </div>
     </div>;
   }
 
@@ -352,16 +376,18 @@ function SchemaOrg() {
       </div>
     </div>;
 
+    let fieldDetails = getEditingFieldDetails(editingField);
+
     let schemaPage = <div className={styles.csnSchemaPage}>
       <div>
         <div className={styles.csnControlsPanel}>
           <button onClick={(e) => goBack()}>&lArr; Back</button>
+          <button onClick={(e) => goFieldsSelected()}>Fields Selected &rArr;</button>
         </div>
         <div className={styles.csnSchemaContent}>
           <div className={styles.csnSchemaDisplay}>
             <div className={styles.csnJSON}>
               { displaySchema(jsonSchema, options) }
-              { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
             </div>
           </div>
           <div className={styles.csnSchemaControls}>
@@ -371,25 +397,72 @@ function SchemaOrg() {
                 <div className={styles.csnSchemaSettingLabel}>
                   Show descriptions:
                 </div>
-                <input type="checkbox" value={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
+                <div className={styles.csnSchemaSettingControl}>
+                  <input type="checkbox" value={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
+                </div>
               </div>
               <div className={styles.csnSchemaSettingRow}>
                 <div className={styles.csnSchemaSettingLabel}>
                   Use sub class fields:
                 </div>
-                <input type="checkbox" value={useSubClasses} onChange={e => changeSettingUseSubClasses(e.target.checked)} />
+                <div className={styles.csnSchemaSettingControl}>
+                  <input type="checkbox" value={useSubClasses} onChange={e => changeSettingUseSubClasses(e.target.checked)} />
+                </div>
               </div>
               <div className={styles.csnSchemaSettingRow}>
                 <div className={styles.csnSchemaSettingLabel}>
                   Recursion levels:
                 </div>
-                <select value={recursionLevels} onChange={e => changeSettingRecursionLevels(e.target.value)}>
-                  <option value="0">0</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                </select>
+                <div className={styles.csnSchemaSettingControl}>
+                  <select value={recursionLevels} onChange={e => changeSettingRecursionLevels(e.target.value)}>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                  </select>
+                </div>
               </div>
             </form>
+            {editingField && 
+              <div>
+                <h3>Property Controls</h3>
+                <h4>
+                  Property: {editingField}
+                </h4>
+                
+                <div className={styles.csnSchemaSettingRow}>
+                  <div className={styles.csnSchemaSettingLabel}>
+                    Type
+                  </div>
+                  <div className={styles.csnSchemaSettingControl}>
+                    <select value={fieldDetails.type} onChange={e => changeSettingRecursionLevels(e.target.value)}>
+                      <option value="string">String</option>
+                      <option value="number">Number</option>
+                      <option value="integer">Integer</option>
+                      <option value="boolean">Boolean</option>
+                    </select>
+                  </div>
+                </div>
+ 
+                <div className={styles.csnSchemaSettingRow}>
+                  <div className={styles.csnSchemaSettingLabel}>
+                    Pattern 
+                  </div>
+                  <div className={styles.csnSchemaSettingControl}>
+                    <input type="text" value={''} />
+                  </div>
+                </div>
+
+
+                <div className={styles.csnSchemaSettingRow}>
+                  <div className={styles.csnSchemaSettingLabel}>
+                    Required 
+                  </div>
+                  <div className={styles.csnSchemaSettingControl}>
+                    <input type="checkbox" onChange={e => changeSettingShowDesc(e.target.checked)} />
+                  </div>
+                </div>
+      
+              </div>
+            }
           </div>
         </div>
       </div>

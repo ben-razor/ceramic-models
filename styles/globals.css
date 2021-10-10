@@ -28,8 +28,15 @@ h2 {
   font-size: 1em;
 }
 
-input {
-  font-size: 1.2em;
+input, select {
+  font-size: 1.1em;
+  width: 100%;
+}
+
+input[type=checkbox] {
+  width: 1em;
+  height: 1em;
+  margin-left: 0;
 }
 
 button, input[type=submit] {
