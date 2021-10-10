@@ -2,17 +2,52 @@ export async function getSchema() {
     let success = false;
     let error = '';
     let data;
+    let idIndex;
+    let fieldIndex;
 
     try {
         let r = await fetch('https://schema.org/version/latest/schemaorg-current-https.jsonld');
         data = await r.json();
+        ({ idIndex, fieldIndex } = generateIndexes(data));
         success = true;
     }
     catch(e) {
         error = e;
     }
 
-    return { success, data, error };
+    return { success, data, error, idIndex, fieldIndex };
+}
+
+function generateIndexes(data) {
+    let graph = data.graph;
+    let idIndex = {};
+    let fieldIndex = {};
+    let i = 0;
+
+    for(let record of graph) {
+        let id = record['@id'];
+        idIndex[id] = i;
+        fieldIndex[id] = [];
+        i++;
+    }
+
+    for(let record of graph) {
+        let id = record['@id'];
+        let domainIncludes = record['domainIncludes'];
+
+        if(Array.isArray(domainIncludes)) {
+            for(let field of domainIncludes) {
+                let fieldId = field['@id'];
+                fieldIndex[fieldId].push(id);
+            }
+        }
+        else {
+            let fieldId = domainIncludes['@id'];
+            fieldIndex[fieldId].push(id);
+        }
+    }
+
+    return { idIndex, fieldIndex };
 }
 
 /**
@@ -79,19 +114,35 @@ function getSubclassFields(startSubClass, data, options) {
     return allSubClassFields;
 }
 
-export function getObjectFeatures(objectName, data, options) {
+export function getObjectFeatures(objectName, data, options, context={}) {
     let graph = data["@graph"];
     let schemaSelector = `schema:${objectName}`;
+    let baseItem;
 
-    let baseItem = graph.filter(x => x['@id'] === schemaSelector)[0];
+    if(context.idIndex) {
+        let itemIndex = context.idIndex[schemaSelector];
+        baseItem = graph[itemIndex];
+    }
+    else {
+        baseItem = graph.filter(x => x['@id'] === schemaSelector)[0];
+    }
 
     let fields;
     if(baseItem) {
-        fields = graph.filter(x => matchItemOrArray(x["schema:domainIncludes"], val => {
-            if(val) {
-                return val['@id'] === schemaSelector;
+        if(context.fieldIndex) {
+            let itemIndexes = context.idIndex[schemaSelector];
+            fields = [];
+            for(let itemIndex in itemIndexes) {
+                fields.push(graph[itemIndex]);
             }
-        }));
+        }
+        else {
+            fields = graph.filter(x => matchItemOrArray(x["schema:domainIncludes"], val => {
+                if(val) {
+                    return val['@id'] === schemaSelector;
+                }
+            }));
+        }
     }
 
     let subClass = baseItem['rdfs:subClassOf'];
@@ -107,14 +158,16 @@ export function getObjectFeatures(objectName, data, options) {
  * @param {object} options 
  * @param {object} context        An object for passing info down the tree
  */
-export function jsonLdToJsonSchema(objectName, data, options, context) {
+export function jsonLdToJsonSchema(objectName, data, options, context={}) {
     let {baseItem, fields: ownFields, subClass} = getObjectFeatures(objectName, data, options);
 
     let fields = ownFields;
 
-    if(options.useSubClasses) {
-        let subClassFields = getSubclassFields(subClass, data, options);
-        fields = ownFields.concat(subClassFields);
+    if(options.useSubClasses && subClass) {
+        if(subClass['@id']) {
+            let subClassFields = getSubclassFields(subClass, data, options, context);
+            fields = ownFields.concat(subClassFields);
+        }
     }
 
     let comment = baseItem['rdfs:comment'];
@@ -138,7 +191,7 @@ export function jsonLdToJsonSchema(objectName, data, options, context) {
     for(let field of fields) {
         let fieldId = field['@id'];
         let subObjectName = fieldId.split(':')[1];
-        let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data, options);
+        let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data, options, context);
 
         let rangeIncludes = baseItemSub['schema:rangeIncludes'];
 
@@ -155,7 +208,7 @@ export function jsonLdToJsonSchema(objectName, data, options, context) {
             }
             rangeIncludeId = rangeInclude['@id'];
             let rangeIncludeName = rangeIncludeId.split(':')[1];
-            let {baseItem: baseItemRange, fields: fieldsRange, subClass: subClassRange} = getObjectFeatures(rangeIncludeName, data, options);
+            let {baseItem: baseItemRange, fields: fieldsRange, subClass: subClassRange} = getObjectFeatures(rangeIncludeName, data, options, context);
             comment = baseItemRange['rdfs:comment'];
 
             type = rangeIncludeId;
@@ -212,7 +265,9 @@ export function jsonLdToJsonSchema(objectName, data, options, context) {
                 }
                 let propertyName = propertyId.split(':')[1];
 
-                let propertySchemaObj = jsonLdToJsonSchema(propertyName, data, options, { recursionLevel: recursionLevel + 1 })
+                context.recursionLevel = recursionLevel + 1;
+                let propertySchemaObj = jsonLdToJsonSchema(propertyName, data, options, context);
+                context.recursionLevel = context.recursionLevel - 1;
                 if(propertySchemaObj && propertySchemaObj.properties) {
                     propertyObj['properties'] = propertySchemaObj.properties;
                 }

@@ -17,13 +17,15 @@ function SchemaOrg() {
   const [dataLoaded, setDataLoaded] = useState();
   const [dataLoadError, setDataLoadError] = useState();
   const [data, setData] = useState();
+  const [idIndex, setIdIndex] = useState();
+  const [fieldIndex, setFieldIndex] = useState();
   const [enteredType, setEnteredType] = useState('');
   const [type, setType] = useState('Class');
   const [typeSearchResults, setTypeSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
-  const [options, setOptions] = useState({});
+  const [options, setOptions] = useState({ expanded: {} });
 
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [useSubClasses, setUseSubClasses] = useState(false);
@@ -31,12 +33,13 @@ function SchemaOrg() {
 
   useEffect(() => {
     (async() => {
-      let { success, data, error } = await getSchema();
+      let { success , data: _data, error, idIndex: _idIndex, fieldIndex: _fieldIndex } = await getSchema();
 
       setDataLoaded(success);
-      setData(data);
+      setData(_data);
       setDataLoadError(error);
-
+      setIdIndex(_idIndex);
+      setFieldIndex(_fieldIndex);
     })();
 
   }, []);
@@ -64,10 +67,11 @@ function SchemaOrg() {
 
   useEffect(() => {
     if(selectedObject && data) {
-      let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data, options);
+      let context = { idIndex, fieldIndex };
+      let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data, options, context);
       setJSONSchema(_jsonSchemaObj);
     }
-  }, [selectedObject, data, options]);
+  }, [selectedObject, data, options, idIndex, fieldIndex]);
 
   function selectObject(name) {
     console.log(name);
@@ -170,6 +174,92 @@ function SchemaOrg() {
     setOptions(newOptions);
   }
   
+  function setExpanded(property, value) {
+    let _options = { ...options };
+    _options.expanded[property] = value;
+    setOptions(_options);
+  }
+
+  function doPropertyDisplayRecursion(propertyUI, properties, options={}, context={}) {
+    let level = context.recursionLevel;
+    let propertyUIThisLevel = [];
+
+    if(properties) {
+      for(let property of Object.keys(properties)) {
+        let propertyInfo = properties[property];
+
+        let hasChildProperties = propertyInfo.properties && 
+                                 typeof propertyInfo.properties === 'object' &&
+                                 Object.keys(propertyInfo.properties).length > 0;
+
+        let isExpanded = options.expanded && options.expanded[property];
+
+        propertyUIThisLevel.push(<div className={styles.csnSchemaProperty}>
+          { hasChildProperties ? (
+              <a onClick={ e => setExpanded(property, !isExpanded) }>
+                { !isExpanded ? <span>&#x25B2;</span> : <span>&#x25BC;</span> }
+              </a>
+            ) : (
+              <span style={{opacity: 0}}>&#x25B2;</span> 
+            )
+          }
+          <input type="checkbox"></input>
+          {property}
+        </div>);
+        
+        if(options.showDescriptions) {
+          let propertyInfo = properties[property];
+          let description = propertyInfo['description'];
+          if(description) {
+            propertyUIThisLevel.push(<div>{description}</div>);
+          }
+        }
+
+        let doRecurse = false;
+        if(level < options.recursionLevels) {
+          doRecurse = true;
+        }
+        if(hasChildProperties && doRecurse) {
+          context.recursionLevel = level + 1;
+          let propertyUINextLevel = [];
+          doPropertyDisplayRecursion(propertyUINextLevel, propertyInfo.properties, options, context);
+
+          let subListStyle = {display: 'block'};
+          if(!isExpanded) {
+            subListStyle = {display: 'none'}
+          }
+          propertyUIThisLevel.push(
+            <div style={ subListStyle } className={styles.csnSchemaLevel + ' ' + styles['csnSchemaLevel' + context.recursionLevel]}>
+              {propertyUINextLevel}
+            </div>
+          );
+
+          context.recursionLevel = context.recursionLevel - 1;
+        }
+      }
+    }
+
+    propertyUI.push(propertyUIThisLevel);
+   
+    return propertyUI;
+  }
+
+  function displaySchema(jsonSchema, options={}) {
+    let propertyUI = [];
+
+    let context = { recursionLevel: 0 };
+
+    if(jsonSchema.properties) {
+      doPropertyDisplayRecursion(propertyUI, jsonSchema.properties, options, context);
+    }
+
+    return <div>
+      <h3>{jsonSchema['title']}</h3>
+      <div>{jsonSchema['description']}</div>
+      <div>{propertyUI}</div>
+    </div>;
+  }
+
   function getPageContent() {
     let content;
 
@@ -190,6 +280,7 @@ function SchemaOrg() {
         <div className={styles.csnSchemaContent}>
           <div className={styles.csnSchemaDisplay}>
             <div className={styles.csnJSON}>
+              { displaySchema(jsonSchema, options) }
               { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
             </div>
           </div>
