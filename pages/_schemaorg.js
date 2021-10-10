@@ -135,7 +135,7 @@ function SchemaOrg() {
 
   function getDataPanel() {
     return <div className="sorgDataPanel">
-      { !dataLoaded && 'Data not loaded' } 
+      { !data && 'Data loading...' } 
     </div>;
   }
 
@@ -160,7 +160,7 @@ function SchemaOrg() {
 
   function getSearchForm() {
     return <form onSubmit={handleTypeFormSubmit}>
-      <input type="text" value={searchQuery} 
+      <input className={styles.csnObjectTypeSearch} type="text" value={searchQuery} 
              onChange={e => setSearchQuery(e.target.value.toLowerCase())} 
              placeholder="Search Object Type..." />
     </form>;
@@ -249,6 +249,8 @@ function SchemaOrg() {
     }
     setOptions(_options);
 
+    setEditingField(property)
+
     console.log(options.selectedFields);
   }
 
@@ -332,9 +334,13 @@ function SchemaOrg() {
   function getEditingFieldDetails(path) {
     if(jsonSchema && path) {
       let pathParts = path.split('/');
+      console.log(pathParts);
+      console.log(jsonSchema.properties);
       let curProperties = jsonSchema.properties;
       for(let part of pathParts) {
-        curProperties = curProperties[part]
+        if(curProperties[part].properties) {
+          curProperties = curProperties[part].properties;
+        }
       }
       return curProperties;
     }
@@ -421,7 +427,7 @@ function SchemaOrg() {
                 </div>
               </div>
             </form>
-            {editingField && 
+            {(editingField && fieldDetails) && 
               <div>
                 <h3>Property Controls</h3>
                 <h4>

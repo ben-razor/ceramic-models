@@ -133,6 +133,7 @@
 
 .csnSchemaProperty {
     font-weight: bold;
+    display: flex;
 }
 
 .csnSchemaExpander {
@@ -181,4 +182,8 @@
     border: 1px solid white;
     padding: 0.5em;
     margin-left: 1em;
+}
+
+.csnObjectTypeSearch {
+    width: 30%;
 }
