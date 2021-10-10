@@ -25,7 +25,8 @@ function SchemaOrg() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
-  const [options, setOptions] = useState({ expanded: {} });
+  const [jsonSchemaPropertyLimited, setJSONSchemaPropertyLimited] = useState('');
+  const [options, setOptions] = useState({ expanded: {}, selectedFields: {} });
 
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [useSubClasses, setUseSubClasses] = useState(false);
@@ -72,6 +73,58 @@ function SchemaOrg() {
       setJSONSchema(_jsonSchemaObj);
     }
   }, [selectedObject, data, options, idIndex, fieldIndex]);
+
+  useEffect(() => {
+    if(jsonSchema) {
+      let _jsonSchema = JSON.parse(JSON.stringify(jsonSchema));
+      _jsonSchema.properties = { };
+      let fields = Object.keys(options.selectedFields);
+
+      for(let path of fields) {
+        let pathParts = path.split('/');
+        copyObjectProperties(jsonSchema.properties, _jsonSchema.properties, pathParts);
+      }
+
+      console.log(_jsonSchema);
+    }
+
+  }, [jsonSchema, options.selectedFields]);
+
+  const copyObjectProperties = function(origProperties, newProperties, fields) {
+    let field = fields[0];
+
+    if(field && origProperties[field]) {
+      let origData = origProperties[field];
+
+      if(origData) {
+        newProperties[field] = {};
+        let newData = newProperties[field];
+
+        if(origData['type']) newData['type'] = origData['type'];
+        if(origData['format']) newData['format'] = origData['format'];
+        if(origData['description']) newData['description'] = origData['description'];
+        if(origData['properties']) {
+          newData['properties'] = {};
+        }
+
+        copyObjectProperties(origData.properties, newData.properties, fields.slice(1));
+      }
+    }
+  }
+
+  function markObjectProperties(object, path, field, value, context) {
+    let level = context.level;
+    let pathPart = path[level];
+
+    if(pathPart && object[pathPart] && typeof object[pathPart] === 'object') {
+      object[pathPart].field = value;
+      context.level = context.level + 1;
+      if(level < path.length) {
+        markObjectProperties(object, path, field, value, context);
+        context.level = context.level - 1;
+      }
+    }
+  }
 
   function selectObject(name) {
     console.log(name);
@@ -123,12 +176,12 @@ function SchemaOrg() {
       typeSearchResultsUI.push(
         <div className={styles.searchResult} key={name}>
           <a onClick={e => selectObject(name)} className={styles.searchResultName}>
-            <div>
+            <div className={styles.csnTextEllipsis}> 
               {name}
             </div>
           </a>
           <div className={styles.searchResultDesc}>
-            {comment}
+            {processDescription(comment)}
           </div>
         </div>
       )
@@ -180,6 +233,26 @@ function SchemaOrg() {
     setOptions(_options);
   }
 
+  function selectField(property, selected) {
+    let _options = { ...options };
+    if(selected) {
+      _options.selectedFields[property] = selected;
+    }
+    else {
+      delete _options.selectedFields[property];
+    }
+    setOptions(_options);
+
+    console.log(options.selectedFields);
+  }
+
+  function processDescription(description) {
+    if(description) {
+      description = description.replace(/[\\]+/g," ")
+    }
+    return description;
+  }
+
   function doPropertyDisplayRecursion(propertyUI, properties, options={}, context={}) {
     let level = context.recursionLevel;
     let propertyUIThisLevel = [];
@@ -196,7 +269,7 @@ function SchemaOrg() {
 
         let isExpanded = options.expanded && options.expanded[propertyPath];
 
-        propertyUIThisLevel.push(<div className={styles.csnSchemaProperty}>
+        propertyUIThisLevel.push(<div className={styles.csnSchemaProperty} key={property}>
           { hasChildProperties ? (
               <a onClick={ e => setExpanded(propertyPath, !isExpanded) } className={styles.csnSchemaExpander}>
                 { !isExpanded ? <span>&#x25B2;</span> : <span>&#x25BC;</span> }
@@ -205,13 +278,13 @@ function SchemaOrg() {
               <span style={{opacity: 0}}>&#x25B2;</span> 
             )
           }
-          <input type="checkbox"></input>
+          <input type="checkbox" value={options.selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
           {property} - {propertyPath}
         </div>);
         
         if(options.showDescriptions) {
           let propertyInfo = properties[property];
-          let description = propertyInfo['description'];
+          let description = processDescription(propertyInfo['description']);
           if(description) {
             propertyUIThisLevel.push(<div>{description}</div>);
           }
@@ -232,7 +305,7 @@ function SchemaOrg() {
             subListStyle = {display: 'none'}
           }
           propertyUIThisLevel.push(
-            <div style={ subListStyle } className={styles.csnSchemaLevel + ' ' + styles['csnSchemaLevel' + context.recursionLevel]}>
+            <div style={ subListStyle } className={styles.csnSchemaLevel + ' ' + styles['csnSchemaLevel' + context.recursionLevel]} key={property + context.recursionLevel}>
               {propertyUINextLevel}
             </div>
           );
@@ -262,7 +335,7 @@ function SchemaOrg() {
 
     return <div>
       <h3>{jsonSchema['title']}</h3>
-      <div>{jsonSchema['description']}</div>
+      <div>{processDescription(jsonSchema['description'])}</div>
       <div>{propertyUI}</div>
     </div>;
   }

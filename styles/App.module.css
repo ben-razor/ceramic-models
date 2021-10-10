@@ -61,6 +61,8 @@
     border-radius: 1em; 
     cursor: default;
     user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .searchResultName:hover {
@@ -129,6 +131,7 @@
 
 .csnSchemaExpander {
     cursor: pointer;
+    user-select: none;
 }
 
 .csnSchemaLevel {
@@ -147,4 +150,9 @@
 }
 .csnSchemaLevel4 {
     margin-left: 4em;
+}
+
+.csnTextEllipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
