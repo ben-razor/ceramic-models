@@ -26,9 +26,13 @@ function SchemaOrg() {
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
   const [jsonSchemaWithFieldsChosen, setJSONSchemaWithFieldsChosen] = useState('');
-  const [options, setOptions] = useState({ expanded: {}, selectedFields: {} });
+  const [options, setOptions] = useState({ expanded: {}, selectedFields: {}, editedFields: {} });
   const [fieldsChosen, setFieldsChosen] = useState(false);
   const [editingField, setEditingField] = useState();
+  const [editingFieldType, setEditingFieldType] = useState('');
+  const [editingFieldPattern, setEditingFieldPattern] = useState('');
+  const [editingFieldRequired, setEditingFieldRequired] = useState(false);
+  const [editedFieldDetails, setEditedFieldDetails] = useState({});
 
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [useSubClasses, setUseSubClasses] = useState(false);
@@ -87,10 +91,12 @@ function SchemaOrg() {
         copyObjectProperties(jsonSchema.properties, _jsonSchema.properties, pathParts);
       }
 
+      setEditingFieldDetails(_jsonSchema, editedFieldDetails);
+      
       setJSONSchemaWithFieldsChosen(_jsonSchema);
     }
 
-  }, [jsonSchema, options.selectedFields]);
+  }, [jsonSchema, options.selectedFields, options.editedFields, editedFieldDetails ]);
 
   const copyObjectProperties = function(origProperties, newProperties, fields) {
     let field = fields[0];
@@ -111,6 +117,56 @@ function SchemaOrg() {
 
         copyObjectProperties(origData.properties, newData.properties, fields.slice(1));
       }
+    }
+  }
+
+  function setEditingFieldDetails(schema, details) {
+    let path = details.path;
+
+    if(schema && path) {
+      let pathParts = path.split('/');
+      console.log(pathParts);
+      console.log(schema.properties);
+      let curProperties = schema.properties;
+
+      for(let part of pathParts) {
+        if(curProperties[part]) {
+          if(curProperties[part].properties) {
+            curProperties = curProperties[part].properties;
+          }
+          else {
+            curProperties = curProperties[part];
+          }
+        }
+      }
+
+      if(curProperties) { 
+        if(details.type) curProperties['type'] = details.type; 
+        if(details.pattern) curProperties['pattern'] = details.pattern;
+        if(details.required) {
+          if(!schema.required) {
+            curProperties.required = [];
+          }
+          curProperties.required.push(pathParts.slice(-1)[0]);
+        }
+      }
+    }
+  }
+
+  function getEditingFieldDetails(path) {
+    if(jsonSchema && path) {
+      let pathParts = path.split('/');
+      console.log(pathParts);
+      console.log(jsonSchema.properties);
+      let curProperties = jsonSchema.properties;
+      for(let part of pathParts) {
+        if(curProperties[part]) {
+          if(curProperties[part].properties) {
+            curProperties = curProperties[part].properties;
+          }
+        }
+      }
+      return curProperties;
     }
   }
 
@@ -331,21 +387,6 @@ function SchemaOrg() {
     return propertyUI;
   }
 
-  function getEditingFieldDetails(path) {
-    if(jsonSchema && path) {
-      let pathParts = path.split('/');
-      console.log(pathParts);
-      console.log(jsonSchema.properties);
-      let curProperties = jsonSchema.properties;
-      for(let part of pathParts) {
-        if(curProperties[part].properties) {
-          curProperties = curProperties[part].properties;
-        }
-      }
-      return curProperties;
-    }
-  }
-
   function displaySchema(jsonSchema, options={}) {
     let propertyUI = [];
 
@@ -368,6 +409,19 @@ function SchemaOrg() {
         </div>
       </div>
     </div>;
+  }
+
+  function updateEditingField(e) {
+    let details = {
+      path: editingField,
+      type: editingFieldType,
+      pattern: editingFieldPattern,
+      required: editingFieldRequired
+    }
+    //const [editingFieldPattern, setEditingFieldPattern] = useState();
+    //const [editingFieldRequired, setEditingFieldRequired] = useState();
+    setEditedFieldDetails(details);
+    e.preventDefault();
   }
 
   function getPageContent() {
@@ -434,39 +488,43 @@ function SchemaOrg() {
                   Property: {editingField}
                 </h4>
                 
-                <div className={styles.csnSchemaSettingRow}>
-                  <div className={styles.csnSchemaSettingLabel}>
-                    Type
+                <form onSubmit={e => updateEditingField(e)}>
+                  <div className={styles.csnSchemaSettingRow}>
+                    <div className={styles.csnSchemaSettingLabel}>
+                      Type
+                    </div>
+                    <div className={styles.csnSchemaSettingControl}>
+                      <select value={editingFieldType || fieldDetails.type} onChange={e => setEditingFieldType(e.target.value)}>
+                        <option value="string">String</option>
+                        <option value="number">Number</option>
+                        <option value="integer">Integer</option>
+                        <option value="boolean">Boolean</option>
+                      </select>
+                    </div>
                   </div>
-                  <div className={styles.csnSchemaSettingControl}>
-                    <select value={fieldDetails.type} onChange={e => changeSettingRecursionLevels(e.target.value)}>
-                      <option value="string">String</option>
-                      <option value="number">Number</option>
-                      <option value="integer">Integer</option>
-                      <option value="boolean">Boolean</option>
-                    </select>
+  
+                  <div className={styles.csnSchemaSettingRow}>
+                    <div className={styles.csnSchemaSettingLabel}>
+                      Pattern 
+                    </div>
+                    <div className={styles.csnSchemaSettingControl}>
+                      <input type="text" value={editingFieldPattern} onChange={e => setEditingFieldPattern(e.target.value)} />
+                    </div>
                   </div>
-                </div>
- 
-                <div className={styles.csnSchemaSettingRow}>
-                  <div className={styles.csnSchemaSettingLabel}>
-                    Pattern 
-                  </div>
-                  <div className={styles.csnSchemaSettingControl}>
-                    <input type="text" value={''} />
-                  </div>
-                </div>
 
 
-                <div className={styles.csnSchemaSettingRow}>
-                  <div className={styles.csnSchemaSettingLabel}>
-                    Required 
+                  <div className={styles.csnSchemaSettingRow}>
+                    <div className={styles.csnSchemaSettingLabel}>
+                      Required 
+                    </div>
+                    <div className={styles.csnSchemaSettingControl}>
+                      <input type="checkbox" onChange={e => setEditingFieldRequired(e.target.checked)} />
+                    </div>
                   </div>
-                  <div className={styles.csnSchemaSettingControl}>
-                    <input type="checkbox" onChange={e => changeSettingShowDesc(e.target.checked)} />
-                  </div>
-                </div>
-      
+
+                  <input type="submit" name="submit" value="Update Schema" />
+                </form>
+                      
               </div>
             }
           </div>
