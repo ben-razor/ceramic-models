@@ -108,9 +108,12 @@ export function getObjectFeatures(objectName, data, options) {
 export function jsonLdToJsonSchema(objectName, data, options) {
     let {baseItem, fields: ownFields, subClass} = getObjectFeatures(objectName, data, options);
 
-    let subClassFields = getSubclassFields(subClass, data, options);
+    let fields = ownFields;
 
-    let fields = ownFields.concat(subClassFields);
+    if(options.useSubClasses) {
+        let subClassFields = getSubclassFields(subClass, data, options);
+        fields = ownFields.concat(subClassFields);
+    }
 
     let comment = baseItem['rdfs:comment'];
     if(typeof comment === 'object') {
@@ -132,7 +135,6 @@ export function jsonLdToJsonSchema(objectName, data, options) {
 
     for(let field of fields) {
         let subObjectName = field['@id'].split(':')[1];
-        console.log(subObjectName);
         let {baseItem: baseItemSub, fields: fieldsSub, subClass: subClassSub} = getObjectFeatures(subObjectName, data, options);
 
         let rangeIncludes = baseItemSub['schema:rangeIncludes'];
