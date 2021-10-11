@@ -307,6 +307,7 @@ function SchemaOrg() {
 
   function goCreateModel() {
     setCreatingModel(true);
+    setModelTab('schema');
   }
 
   function changeSettingShowMainDesc(val) {
@@ -738,6 +739,7 @@ function SchemaOrg() {
             </div>
           </div>
           <div className={styles.csnModelControls}>
+            {/*
             <h3>Ceramic Data Model</h3>
             <p>
               Ceramic Data Models are schemas along with some metadata and supporting documents to make interacting with the schemas easier.
@@ -748,6 +750,8 @@ function SchemaOrg() {
             <p>
               Community Data Models are stored in a {getLink("https://github.com/ceramicstudio/datamodels", "Github Repository")}.
             </p>
+            */}
+           
             <h3>Creating Your Data Model</h3>
             <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>

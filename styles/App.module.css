@@ -16,7 +16,7 @@
 }
 
 .csnTitle {
-    background: -webkit-linear-gradient(hsl(19deg, 100%, 64%) 0%, hsl(19deg, 100%, 64%) 44%,  hsl(13deg, 100%, 50%) 44%);
+    background: -webkit-linear-gradient(hsl(215deg, 89%, 71%) 0%, hsl(19deg, 100%, 64%) 44%, hsl(215deg, 85%, 67%) 44%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 1px white;
