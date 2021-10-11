@@ -10,10 +10,10 @@ import DataModels from './components/DataModels';
 import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema } from './components/JsonLd';
 import { prettyPrintJson } from 'pretty-print-json';
 import camelToKebabCase from "camel-to-kebab";
+import template from './data/markdown/template.md';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
-
 
 const validPropertiesAllTypes = ['type', 'required'];
 
@@ -706,6 +706,7 @@ function SchemaOrg() {
         <div className={styles.csnModelContent}>
           <div className={styles.csnModelDisplay}>
             <div className={styles.csnJSON}>
+              <div>{template}</div>
               { displaySchemaForCreateModel(jsonSchema, options) }
             </div>
           </div>
