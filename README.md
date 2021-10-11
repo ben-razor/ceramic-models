@@ -44,6 +44,10 @@ They are wrapped in npm packages so that they can be easily reused within differ
 
 [https://schema.org/version/latest/schemaorg-current-https.jsonld](https://schema.org/version/latest/schemaorg-current-https.jsonld)
 
+### JSON LD to JSON Schema Resources
+
+https://github.com/ceramicnetwork/ceramic/issues/81#issuecomment-940386623
+
 ## Running The Development Version
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
