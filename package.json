@@ -19,6 +19,7 @@
     "@glazed/datamodel": "^0.1.2",
     "@glazed/devtools": "^0.1.3",
     "@glazed/did-datastore": "^0.1.4",
+    "camel-to-kebab": "^1.1.0",
     "dids": "^2.4.0",
     "next": "11.1.2",
     "pretty-print-json": "^1.1.1",

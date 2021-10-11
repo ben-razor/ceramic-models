@@ -9,6 +9,7 @@ import { DID } from 'dids'
 import DataModels from './components/DataModels';
 import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema } from './components/JsonLd';
 import { prettyPrintJson } from 'pretty-print-json';
+import camelToKebabCase from "camel-to-kebab";
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
@@ -46,6 +47,7 @@ function SchemaOrg() {
   const [selectedFields, setSelectedFields] = useState({});
 
   const [showDescriptions, setShowDescriptions] = useState(false);
+  const [showMainDescription, setShowMainDescription] = useState(false);
   const [useSubClasses, setUseSubClasses] = useState(false);
   const [recursionLevels, setRecursionLevels] = useState(0);
 
@@ -105,6 +107,10 @@ function SchemaOrg() {
       for(let editedPropertyPath of Object.keys(allEditedProperties)) {
         let editedProps = allEditedProperties[editedPropertyPath];
         overwriteSchemaProperties(_jsonSchema, editedProps);
+      }
+
+      if(!options.showMainDescription) {
+        delete _jsonSchema['description'];
       }
       
       setJSONSchemaWithFieldsChosen(_jsonSchema);
@@ -259,11 +265,11 @@ function SchemaOrg() {
       }
       typeSearchResultsUI.push(
         <div className={styles.searchResult} key={name}>
-          <a onClick={e => selectObject(name)} className={styles.searchResultName}>
+          <div onClick={e => selectObject(name)} className={styles.searchResultName}>
             <div className={styles.csnTextEllipsis}> 
               {name}
             </div>
-          </a>
+          </div>
           <div className={styles.searchResultDesc}>
             {processDescription(comment)}
           </div>
@@ -298,6 +304,14 @@ function SchemaOrg() {
 
   function goCreateModel() {
     setCreatingModel(true);
+  }
+
+  function changeSettingShowMainDesc(val) {
+    let newOptions = {...options};
+    newOptions['showMainDescription'] = val;
+    console.log(val);
+    setShowMainDescription(val);
+    setOptions(newOptions);
   }
 
   function changeSettingShowDesc(val) {
@@ -468,7 +482,7 @@ function SchemaOrg() {
     };
 
     return <div>
-      <h3>{jsonSchema['title']}</h3>
+      <h3>Data Model: {jsonSchema['title']}</h3>
       <div>{processDescription(jsonSchema['description'])}</div>
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
@@ -592,6 +606,8 @@ function SchemaOrg() {
           <div className={styles.csnSchemaControls}>
             <h3>Schema Controls</h3>
             <form>
+
+              {/*
               <div className={styles.csnSchemaSettingRow}>
                 <div className={styles.csnSchemaSettingLabel}>
                   Show descriptions:
@@ -600,6 +616,8 @@ function SchemaOrg() {
                   <input type="checkbox" value={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
                 </div>
               </div>
+              */}
+
               <div className={styles.csnSchemaSettingRow}>
                 <div className={styles.csnSchemaSettingLabel}>
                   Use sub class fields:
@@ -608,17 +626,20 @@ function SchemaOrg() {
                   <input type="checkbox" value={useSubClasses} onChange={e => changeSettingUseSubClasses(e.target.checked)} />
                 </div>
               </div>
-              <div className={styles.csnSchemaSettingRow}>
-                <div className={styles.csnSchemaSettingLabel}>
-                  Recursion levels:
+              {/*
+                <div className={styles.csnSchemaSettingRow}>
+                  <div className={styles.csnSchemaSettingLabel}>
+                    Recursion levels:
+                  </div>
+                  <div className={styles.csnSchemaSettingControl}>
+                    <select value={recursionLevels} onChange={e => changeSettingRecursionLevels(e.target.value)}>
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                    </select>
+                  </div>
                 </div>
-                <div className={styles.csnSchemaSettingControl}>
-                  <select value={recursionLevels} onChange={e => changeSettingRecursionLevels(e.target.value)}>
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                  </select>
-                </div>
-              </div>
+              */}
+             
             </form>
             {(editingField && currentProperties) && 
               <div>
@@ -667,7 +688,13 @@ function SchemaOrg() {
     return schemaPage;
   }
 
+  function getLink(href, text) {
+    return <a href={href} target="_blank" rel="noreferrer">{text}</a>
+  }
+
   function getCreateModelPage() {
+    let title = jsonSchema['title'];
+    let kebab = camelToKebabCase(title);
 
     let createModelPage = <div className={styles.csnSchemaPage}>
       <div>
@@ -681,7 +708,33 @@ function SchemaOrg() {
             </div>
           </div>
           <div className={styles.csnModelControls}>
-            <h3>Create Data Model</h3>
+            <h3>Ceramic Data Model</h3>
+            <p>
+              Ceramic Data Models are schemas along with some metadata and supporting documents to make interacting with the schemas easier.
+            </p>
+            <p>
+              They are wrapped in npm packages so that they can be easily reused within different applications.
+            </p>
+            <p>
+              Community Data Models are stored in a {getLink("https://github.com/ceramicstudio/datamodels", "Github Repository")}.
+            </p>
+            <h3>Creating Your Data Model</h3>
+            <div><b>(Prerequisite: Know Github forks and pull requests)</b></div>
+            <h4>Initializing</h4>
+            <ol>
+              <li>Read the {getLink("https://github.com/ceramicstudio/datamodels/blob/main/CONTRIBUTING.md", "Contribution Guide")}</li>
+              <li>Fork/Clone the {getLink("https://github.com/ceramicstudio/datamodels", "Data Model Repository")}</li>
+              <li>Copy folder <b>datamodels/identity-profile-basic</b> to <b>datamodels/{kebab}</b></li>
+            </ol>
+            <h4>Updating</h4>
+            <ol>
+              <li>Switch to the new <b>datamodels/{kebab}</b> folder</li>
+              <li>Copy the new <b>README.md</b> over README.md</li>
+              <li>Copy the new <b>{title}.json</b> into schmas/{title}.json</li>
+              <li>Delete <b>schemas/BasicProfile.json</b></li>
+              <li>Update package.json with the new model details</li>
+              <li>Do some magic to make types/{title}.d.ts and src/model.ts appear</li>
+            </ol>
           </div>
         </div>
       </div>
