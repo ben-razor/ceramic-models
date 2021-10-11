@@ -25,6 +25,8 @@ const validTypeProperties = {
   'array': ['minItems', 'maxItems']
 }
 
+const markdownTableRow = '| `{{name}}` | {{desc}} | {{type}} | {{max_size}} | {{optional}} | {{example}} |';
+
 function SchemaOrg() {
   const [dataLoaded, setDataLoaded] = useState();
   const [dataLoadError, setDataLoadError] = useState();
@@ -719,22 +721,30 @@ function SchemaOrg() {
               Community Data Models are stored in a {getLink("https://github.com/ceramicstudio/datamodels", "Github Repository")}.
             </p>
             <h3>Creating Your Data Model</h3>
-            <div><b>(Prerequisite: Know Github forks and pull requests)</b></div>
+            <div><b>(Prerequisite: Know Github fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>
             <ol>
               <li>Read the {getLink("https://github.com/ceramicstudio/datamodels/blob/main/CONTRIBUTING.md", "Contribution Guide")}</li>
-              <li>Fork/Clone the {getLink("https://github.com/ceramicstudio/datamodels", "Data Model Repository")}</li>
-              <li>Copy folder <b>datamodels/identity-profile-basic</b> to <b>datamodels/{kebab}</b></li>
+              <li>Fork the {getLink("https://github.com/ceramicstudio/datamodels", "Data Model Repository")}</li>
+              <li>git clone git@github.com:your-username/datamodels.git</li>
+              <li>git checkout -b {kebab}</li>
+              <li>cd datamodels</li>
+              <li>cp -R <b>packages/identity-profile-basic</b> <b>packages/{kebab}</b></li>
             </ol>
             <h4>Updating</h4>
             <ol>
-              <li>Switch to the new <b>datamodels/{kebab}</b> folder</li>
-              <li>Copy the new <b>README.md</b> over README.md</li>
-              <li>Copy the new <b>{title}.json</b> into schmas/{title}.json</li>
+              <li>cd <b>packages/{kebab}</b></li>
+              <li>Copy the new <b>README</b> over README.md</li>
+              <li>Copy the new <b>Schema</b> into schemas/{title}.json</li>
               <li>Delete <b>schemas/BasicProfile.json</b></li>
               <li>Update package.json with the new model details</li>
               <li>Do some magic to make types/{title}.d.ts and src/model.ts appear</li>
             </ol>
+            <h4>Finally</h4>
+            <ol>
+              <li>Create a pull request on the {getLink("https://github.com/ceramicstudio/datamodels", "Data Model Repository")}</li>
+            </ol>
+
           </div>
         </div>
       </div>
