@@ -55,7 +55,7 @@
     width: 22%;
     padding: 0.2em;
     margin: 0.3em;
-    background-color: orangered;
+    background-color: hsl(19deg, 100%, 50%);
     background-image: linear-gradient(transparent 0%, hsl(19deg, 100%, 60%) 50%, transparent 100%);
     box-shadow: 4px 0px white;
     box-sizing: border-box;
@@ -67,7 +67,7 @@
 }
 
 .searchResultName:hover {
-    background-color: orange;
+    background-color: hsl(19deg, 100%, 44%);
 }
 
 .searchResultName:active {
@@ -186,4 +186,32 @@
 
 .csnObjectTypeSearch {
     width: 30%;
+}
+
+.csnModelContent {
+    display: flex;
+    flex-direction: row;
+}
+
+.csnModelDisplay {
+    width: 60%;
+}
+
+.csnModelControls {
+    border: 2px solid hsl(13deg, 100%, 50%);
+    background-color: hsl(30deg, 40%, 30%);
+    border-radius: 1em;
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    padding: 0.5em;
+    width: 40%;
+}
+
+.csnJSONEditorModelDisplay {
+    width: 100%;
+    background-color: black;
+    border-radius: 0.5em;
+    border: 1px solid white;
+    padding: 0.5em;
+    margin-left: 1em;
 }

@@ -40,7 +40,7 @@ input[type=checkbox] {
 }
 
 button, input[type=submit] {
-  background-color: orangered;
+  background-color: hsl(19deg, 100%, 50%);
   background-image: linear-gradient(transparent 0%, hsl(19deg, 100%, 60%) 50%, transparent 100%);
   padding: 0.5em 2em;
   border-radius: 1em;
@@ -48,4 +48,8 @@ button, input[type=submit] {
   color: white;
   font-size: 0.9em;
   user-select: none;
+}
+
+button:active, input[type=submit]:active {
+  background-color: hsl(19deg, 100%, 44%);
 }

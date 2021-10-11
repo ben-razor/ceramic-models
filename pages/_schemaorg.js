@@ -292,6 +292,10 @@ function SchemaOrg() {
     setCreatingModel(false);
   }
 
+  function goBackEditModel() {
+    setCreatingModel(false);
+  }
+
   function goCreateModel() {
     setCreatingModel(true);
   }
@@ -335,7 +339,6 @@ function SchemaOrg() {
       delete _selectedFields[property];
     }
     setSelectedFields(_selectedFields);
-
     setEditingField(property)
   }
 
@@ -456,6 +459,26 @@ function SchemaOrg() {
     </div>;
   }
 
+  function displaySchemaForCreateModel(jsonSchema, options={}) {
+    let propertyUI = [];
+
+    let context = { 
+      recursionLevel: 0,
+      recursionPath: []
+    };
+
+    return <div>
+      <h3>{jsonSchema['title']}</h3>
+      <div>{processDescription(jsonSchema['description'])}</div>
+      <div className={styles.csnJSONEditor}>
+        <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
+        <div className={styles.csnJSONEditorModelDisplay}>
+          { JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"') } 
+        </div>
+      </div>
+    </div>;
+  }
+
   function submitPropertyEdits(e) {
     let details = {...editingProperties};
     details.path = editingField;
@@ -551,18 +574,7 @@ function SchemaOrg() {
     return editFields;
   }
 
-  function getPageContent() {
-    let content;
-
-    let searchPage = <div className="csnSearchPage">
-      <div>
-        {getDataPanel()}
-      </div>
-      <div>
-        {getTypeSearchPanel()}
-      </div>
-    </div>;
-
+  function getSchemaPage() {
     let currentProperties = getCurrentProperties(editingField);
 
     let schemaPage = <div className={styles.csnSchemaPage}>
@@ -652,11 +664,57 @@ function SchemaOrg() {
       </div>
     </div>;
 
+    return schemaPage;
+  }
+
+  function getCreateModelPage() {
+
+    let createModelPage = <div className={styles.csnSchemaPage}>
+      <div>
+        <div className={styles.csnControlsPanel}>
+          <button onClick={(e) => goBackEditModel()}>&lArr; Back</button>
+        </div>
+        <div className={styles.csnModelContent}>
+          <div className={styles.csnModelDisplay}>
+            <div className={styles.csnJSON}>
+              { displaySchemaForCreateModel(jsonSchema, options) }
+            </div>
+          </div>
+          <div className={styles.csnModelControls}>
+            <h3>Create Data Model</h3>
+          </div>
+        </div>
+      </div>
+    </div>;
+
+    return createModelPage;
+  }
+
+  function getSearchPage() {
+    let searchPage = <div className="csnSearchPage">
+      <div>
+        {getDataPanel()}
+      </div>
+      <div>
+        {getTypeSearchPanel()}
+      </div>
+    </div>;
+
+    return searchPage;
+  }
+
+  function getPageContent() {
+    let content;
     if(jsonSchema) {
-      content = schemaPage;
+      if(creatingModel) {
+        content = getCreateModelPage();
+      }
+      else {
+        content = getSchemaPage();
+      }
     }
     else {
-      content = searchPage;
+      content = getSearchPage();
     }
 
     return content;
