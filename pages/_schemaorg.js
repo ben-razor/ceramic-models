@@ -194,20 +194,23 @@ function SchemaOrg() {
     }
   }
 
-  const getCurrentProperties = useCallback((path) => {
+  const getCurrentProperties = useCallback((path, giveFullInfo=false) => {
     if(jsonSchema && path) {
       let pathParts = path.split('/');
       console.log(pathParts);
       console.log(jsonSchema.properties);
       let curProperties = jsonSchema.properties;
+      let fullInfo = {};
       for(let part of pathParts) {
         if(curProperties[part]) {
           if(curProperties[part].properties) {
             curProperties = curProperties[part].properties;
+            fullInfo = curProperties[part];
           }
         }
       }
-      return curProperties;
+      let ret = giveFullInfo ? fullInfo : curProperties;
+      return ret;
     }
   }, [ jsonSchema ])
 
@@ -376,15 +379,15 @@ function SchemaOrg() {
         setEditingProperties({...allEditedProperties[editingField]});
       }
       else {
-        let currentProperties = getCurrentProperties(editingField);
-        if(currentProperties && currentProperties[editingField]) {
+        let currentProperties = jsonSchema.properties[editingField];
+        if(currentProperties) {
           setEditingProperties({
-            type: currentProperties[editingField].type
+            type: currentProperties.type
           })
         }
       }
     }
-  }, [editingField, getCurrentProperties, allEditedProperties])
+  }, [editingField, jsonSchema, allEditedProperties])
 
   function processDescription(description) {
     if(description) {
