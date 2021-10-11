@@ -24,11 +24,17 @@ They are wrapped in npm packages so that they can be easily reused within differ
 
 ## Useful Links
 
-[JSON Schema](https://json-schema.org/learn/getting-started-step-by-step.html)
+### Ceramic
 
 [Ceramic Data Models Registry](https://github.com/ceramicstudio/datamodels)
 
+[Data Models Contribution Guidelines](https://github.com/ceramicstudio/datamodels/blob/38cdd10596b1da80ecf61f8f384d91d630a3022e/CONTRIBUTING.md)
+
 [Example Basic Models Schema](https://github.com/ceramicstudio/datamodels/blob/main/packages/identity-profile-basic/schemas/BasicProfile.json)
+
+### JSON Schemas
+
+[JSON Schema](https://json-schema.org/learn/getting-started-step-by-step.html)
 
 [JSON Resume Schema](https://jsonresume.org/schema/)
 
