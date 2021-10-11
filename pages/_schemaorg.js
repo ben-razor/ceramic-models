@@ -1,6 +1,6 @@
 import styles from '../styles/App.module.css'
 import CeramicClient from '@ceramicnetwork/http-client';
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, useCallback, Fragment } from 'react';
 import Image from 'next/image';
 import ThreeIdResolver from '@ceramicnetwork/3id-did-resolver';
 import { ThreeIdConnect,  EthereumAuthProvider } from '@3id/connect'
@@ -12,6 +12,17 @@ import { prettyPrintJson } from 'pretty-print-json';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
+
+
+const validPropertiesAllTypes = ['type', 'required'];
+
+const validTypeProperties = {
+  'string': ['pattern', 'minLength', 'maxLength'],
+  'number': ['minimum', 'maximum'],
+  'integer': ['minimum', 'maximum'],
+  'boolean': [],
+  'array': ['minItems', 'maxItems']
+}
 
 function SchemaOrg() {
   const [dataLoaded, setDataLoaded] = useState();
@@ -26,15 +37,13 @@ function SchemaOrg() {
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
   const [jsonSchemaWithFieldsChosen, setJSONSchemaWithFieldsChosen] = useState('');
-  const [options, setOptions] = useState({ expanded: {}, selectedFields: {}, editedFields: {} });
-  const [fieldsChosen, setFieldsChosen] = useState(false);
+  const [options, setOptions] = useState({ expanded: {} });
+  const [creatingModel, setCreatingModel] = useState(false);
   const [editingField, setEditingField] = useState();
-  const [editingFieldType, setEditingFieldType] = useState('');
-  const [editingFieldPattern, setEditingFieldPattern] = useState('');
-  const [editingFieldMinLength, setEditingFieldMinLength] = useState('');
-  const [editingFieldMaxLength, setEditingFieldMaxLength] = useState('');
-  const [editingFieldRequired, setEditingFieldRequired] = useState(false);
-  const [editedFieldDetails, setEditedFieldDetails] = useState({});
+  const [editingProperties, setEditingProperties] = useState({});
+  const [editedProperties, setEditedProperties] = useState({});
+  const [allEditedProperties, setAllEditedProperties] = useState({});
+  const [selectedFields, setSelectedFields] = useState({});
 
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [useSubClasses, setUseSubClasses] = useState(false);
@@ -86,19 +95,22 @@ function SchemaOrg() {
     if(jsonSchema) {
       let _jsonSchema = JSON.parse(JSON.stringify(jsonSchema));
       _jsonSchema.properties = { };
-      let fields = Object.keys(options.selectedFields);
+      let fields = Object.keys(selectedFields);
 
       for(let path of fields) {
         let pathParts = path.split('/');
         copyObjectProperties(jsonSchema.properties, _jsonSchema.properties, pathParts);
       }
 
-      setEditingFieldDetails(_jsonSchema, editedFieldDetails);
+      for(let editedPropertyPath of Object.keys(allEditedProperties)) {
+        let editedProps = allEditedProperties[editedPropertyPath];
+        overwriteSchemaProperties(_jsonSchema, editedProps);
+      }
       
       setJSONSchemaWithFieldsChosen(_jsonSchema);
     }
 
-  }, [jsonSchema, options.selectedFields, options.editedFields, editedFieldDetails ]);
+  }, [jsonSchema, selectedFields, allEditedProperties ]);
 
   const copyObjectProperties = function(origProperties, newProperties, fields) {
     let field = fields[0];
@@ -122,7 +134,7 @@ function SchemaOrg() {
     }
   }
 
-  function setEditingFieldDetails(schema, details) {
+  function overwriteSchemaProperties(schema, details) {
     let path = details.path;
 
     if(schema && path) {
@@ -143,21 +155,31 @@ function SchemaOrg() {
       }
 
       if(curProperties) { 
-        if(details.type) curProperties['type'] = details.type; 
-        if(details.pattern) curProperties['pattern'] = details.pattern;
-        if(details.minLength) curProperties['minLength'] = details.minLength;
-        if(details.maxLength) curProperties['maxLength'] = details.maxLength;
-        if(details.required) {
-          if(!schema.required) {
-            curProperties.required = [];
+        Object.keys(curProperties).forEach(function(key) { delete curProperties[key]; });
+        for(let k of Object.keys(details)) {
+          let type = details['type'];
+          let validTypeProps = validTypeProperties[type] || [];
+
+          if(k !== 'path') {
+            if(k === 'required') {
+              if(!schema.required) {
+                curProperties.required = [];
+              }
+              curProperties.required.push(pathParts.slice(-1)[0]);
+            }
+            else {
+              let prop = details[k];
+              if(validPropertiesAllTypes.includes(k) || validTypeProps.includes(k)) {
+                curProperties[k] = details[k];
+              }
+            }
           }
-          curProperties.required.push(pathParts.slice(-1)[0]);
         }
       }
     }
   }
 
-  function getEditingFieldDetails(path) {
+  const getCurrentProperties = useCallback((path) => {
     if(jsonSchema && path) {
       let pathParts = path.split('/');
       console.log(pathParts);
@@ -172,7 +194,7 @@ function SchemaOrg() {
       }
       return curProperties;
     }
-  }
+  }, [ jsonSchema ])
 
   function markObjectProperties(object, path, field, value, context) {
     let level = context.level;
@@ -263,10 +285,15 @@ function SchemaOrg() {
   function goBack() {
     setJSONSchema('');
     setSelectedObject('');
+    setEditingField('');
+    setEditingProperties({});
+    setEditedProperties({});
+    setAllEditedProperties({});
+    setCreatingModel(false);
   }
 
-  function goFieldsSelected() {
-    setFieldsChosen(true);
+  function goCreateModel() {
+    setCreatingModel(true);
   }
 
   function changeSettingShowDesc(val) {
@@ -300,19 +327,33 @@ function SchemaOrg() {
   }
 
   function selectField(property, selected) {
-    let _options = { ...options };
+    let _selectedFields = {...selectedFields};
     if(selected) {
-      _options.selectedFields[property] = selected;
+      _selectedFields[property] = selected;
     }
     else {
-      delete _options.selectedFields[property];
+      delete _selectedFields[property];
     }
-    setOptions(_options);
+    setSelectedFields(_selectedFields);
 
     setEditingField(property)
-
-    console.log(options.selectedFields);
   }
+
+  useEffect(() => {
+    if(editingField) {
+      if(!allEditedProperties[editingField]) {
+        let currentProperties = getCurrentProperties(editingField);
+        if(currentProperties && currentProperties[editingField]) {
+          setEditingProperties({
+            type: currentProperties[editingField].type
+          })
+        }
+      }
+      else {
+        setEditingProperties({...allEditedProperties[editingField]});
+      }
+    }
+  }, [editingField, getCurrentProperties, allEditedProperties])
 
   function processDescription(description) {
     if(description) {
@@ -346,7 +387,7 @@ function SchemaOrg() {
               <span style={{opacity: 0}}>&#x25B2;</span> 
             )
           }
-          <input type="checkbox" value={options.selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
+          <input type="checkbox" value={selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
           <span onClick={e => setEditingField(propertyPath)}>
             {property}
           </span>
@@ -415,17 +456,99 @@ function SchemaOrg() {
     </div>;
   }
 
-  function updateEditingField(e) {
-    let details = {
-      path: editingField,
-      type: editingFieldType,
-      pattern: editingFieldPattern,
-      required: editingFieldRequired,
-      minLength: editingFieldMinLength,
-      maxLength: editingFieldMaxLength,
-    }
-    setEditedFieldDetails(details);
+  function submitPropertyEdits(e) {
+    let details = {...editingProperties};
+    details.path = editingField;
+    setEditedProperties(details);
+    let _allEditedProperties = JSON.parse(JSON.stringify(allEditedProperties));
+    _allEditedProperties[editingField] = details;
+    setAllEditedProperties(_allEditedProperties);
     e.preventDefault();
+  }
+
+  function handlePropertyEdited(field, value) {
+    let _editingProperties = {...editingProperties};
+    _editingProperties[field] = value;
+    setEditingProperties(_editingProperties);
+  }
+
+  function getPropertyEditFields(type) {
+    let editFields;
+
+    if(type === 'string') {
+      editFields = <div className={styles.csnSchemaEditFields}>
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            Pattern 
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.pattern} onChange={e => handlePropertyEdited('pattern', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            MinLength 
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.minLength} onChange={e => handlePropertyEdited('minLength', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            MaxLength 
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.maxLength} onChange={e => handlePropertyEdited('maxLength', e.target.value)} />
+          </div>
+        </div>
+      </div>
+    }
+    else if(type === 'number' || type === 'integer') {
+      editFields = <div className={styles.csnSchemaEditFields}>
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            Minimum
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.minimum} onChange={e => handlePropertyEdited('minimum', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            Maximum
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.maximum} onChange={e => handlePropertyEdited('maximum', e.target.value)} />
+          </div>
+        </div>
+      </div>
+    }
+    else if(type === 'array') {
+      editFields = <div className={styles.csnSchemaEditFields}>
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            Min Items 
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.minItems} onChange={e => handlePropertyEdited('minItems', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            Max Items
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={editingProperties.maxItems} onChange={e => handlePropertyEdited('maxItems', e.target.value)} />
+          </div>
+        </div>
+      </div>
+    }
+
+    return editFields;
   }
 
   function getPageContent() {
@@ -440,13 +563,13 @@ function SchemaOrg() {
       </div>
     </div>;
 
-    let fieldDetails = getEditingFieldDetails(editingField);
+    let currentProperties = getCurrentProperties(editingField);
 
     let schemaPage = <div className={styles.csnSchemaPage}>
       <div>
         <div className={styles.csnControlsPanel}>
           <button onClick={(e) => goBack()}>&lArr; Back</button>
-          <button onClick={(e) => goFieldsSelected()}>Fields Selected &rArr;</button>
+          <button onClick={(e) => goCreateModel()}>Create Data Model &rArr;</button>
         </div>
         <div className={styles.csnSchemaContent}>
           <div className={styles.csnSchemaDisplay}>
@@ -485,34 +608,26 @@ function SchemaOrg() {
                 </div>
               </div>
             </form>
-            {(editingField && fieldDetails) && 
+            {(editingField && currentProperties) && 
               <div>
                 <h3>Property Controls</h3>
                 <h4>
                   Property: {editingField}
                 </h4>
                 
-                <form onSubmit={e => updateEditingField(e)}>
+                <form onSubmit={e => submitPropertyEdits(e)}>
                   <div className={styles.csnSchemaSettingRow}>
                     <div className={styles.csnSchemaSettingLabel}>
                       Type
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
-                      <select value={editingFieldType || fieldDetails.type} onChange={e => setEditingFieldType(e.target.value)}>
+                      <select value={editingProperties.type || currentProperties.type} onChange={e => handlePropertyEdited('type', e.target.value)}>
                         <option value="string">String</option>
                         <option value="number">Number</option>
                         <option value="integer">Integer</option>
                         <option value="boolean">Boolean</option>
+                        <option value="array">Array</option>
                       </select>
-                    </div>
-                  </div>
-  
-                  <div className={styles.csnSchemaSettingRow}>
-                    <div className={styles.csnSchemaSettingLabel}>
-                      Pattern 
-                    </div>
-                    <div className={styles.csnSchemaSettingControl}>
-                      <input type="text" value={editingFieldPattern} onChange={e => setEditingFieldPattern(e.target.value)} />
                     </div>
                   </div>
 
@@ -521,27 +636,11 @@ function SchemaOrg() {
                       Required 
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
-                      <input type="checkbox" onChange={e => setEditingFieldRequired(e.target.checked)} />
+                      <input type="checkbox" onChange={e => handlePropertyEdited('required', e.target.checked)} />
                     </div>
                   </div>
 
-                  <div className={styles.csnSchemaSettingRow}>
-                    <div className={styles.csnSchemaSettingLabel}>
-                     MinLength 
-                    </div>
-                    <div className={styles.csnSchemaSettingControl}>
-                      <input type="text" value={editingFieldMinLength} onChange={e => setEditingFieldMinLength(e.target.value)} />
-                    </div>
-                  </div>
-
-                  <div className={styles.csnSchemaSettingRow}>
-                    <div className={styles.csnSchemaSettingLabel}>
-                      MaxLength 
-                    </div>
-                    <div className={styles.csnSchemaSettingControl}>
-                      <input type="text" value={editingFieldMaxLength} onChange={e => setEditingFieldMaxLength(e.target.value)} />
-                    </div>
-                  </div>
+                  { getPropertyEditFields(editingProperties.type) }
 
                   <input type="submit" name="submit" value="Update Schema" />
                 </form>

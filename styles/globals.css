@@ -47,4 +47,5 @@ button, input[type=submit] {
   border-color: white;
   color: white;
   font-size: 0.9em;
+  user-select: none;
 }
