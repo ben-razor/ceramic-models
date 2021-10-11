@@ -47,6 +47,7 @@ function SchemaOrg() {
   const [editedProperties, setEditedProperties] = useState({});
   const [allEditedProperties, setAllEditedProperties] = useState({});
   const [selectedFields, setSelectedFields] = useState({});
+  const [modelTab, setModelTab] = useState('schema');
 
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [showMainDescription, setShowMainDescription] = useState(false);
@@ -484,8 +485,6 @@ function SchemaOrg() {
     };
 
     return <div>
-      <h3>Data Model: {jsonSchema['title']}</h3>
-      <div>{processDescription(jsonSchema['description'])}</div>
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
         <div className={styles.csnJSONEditorModelDisplay}>
@@ -694,9 +693,21 @@ function SchemaOrg() {
     return <a href={href} target="_blank" rel="noreferrer">{text}</a>
   }
 
+  function replaceMarkdownTemplate(template, jsonSchema) {
+    let title = jsonSchema['title'];
+    let description = jsonSchema['description'];
+    let kebab = camelToKebabCase(title);
+    let replacedTemplate = template.replaceAll('{{title}}', title);
+    replacedTemplate = replacedTemplate.replaceAll('{{slug}}', kebab);
+    replacedTemplate = replacedTemplate.replaceAll('{{description}}', description);
+    return replacedTemplate;
+  }
+
   function getCreateModelPage() {
     let title = jsonSchema['title'];
     let kebab = camelToKebabCase(title);
+
+    let replacedTemplate = replaceMarkdownTemplate(template, jsonSchema);
 
     let createModelPage = <div className={styles.csnSchemaPage}>
       <div>
@@ -706,8 +717,24 @@ function SchemaOrg() {
         <div className={styles.csnModelContent}>
           <div className={styles.csnModelDisplay}>
             <div className={styles.csnJSON}>
-              <div>{template}</div>
-              { displaySchemaForCreateModel(jsonSchema, options) }
+              <h3>Data Model: {jsonSchema['title']}</h3>
+              <div>{processDescription(jsonSchema['description'])}</div>
+              <div className={styles.csnModelTabs}>
+                <div onClick={() => setModelTab('schema')} className={styles.csnModelTab + ' ' + (modelTab === 'schema' && styles.csnModelTabSelected)}>
+                  {title}.json
+                </div>
+                <div onClick={() => setModelTab('readme')} className={styles.csnModelTab + ' ' + (modelTab === 'readme' && styles.csnModelTabSelected)}>
+                  README.md
+                </div>
+              </div>
+              <div className={styles.csnModelPanel} style={ { display: (modelTab === 'schema' ? 'initial' : 'none') }}>
+                { displaySchemaForCreateModel(jsonSchema, options) }
+              </div>
+              <div style={ { display: (modelTab === 'readme' ? 'initial' : 'none') }}>
+                <pre className={styles.csnMarkdownDisplay} >
+                  {replacedTemplate}
+                </pre>
+              </div>
             </div>
           </div>
           <div className={styles.csnModelControls}>
@@ -722,7 +749,7 @@ function SchemaOrg() {
               Community Data Models are stored in a {getLink("https://github.com/ceramicstudio/datamodels", "Github Repository")}.
             </p>
             <h3>Creating Your Data Model</h3>
-            <div><b>(Prerequisite: Know Github fork, clone, branch, and pull request)</b></div>
+            <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>
             <ol>
               <li>Read the {getLink("https://github.com/ceramicstudio/datamodels/blob/main/CONTRIBUTING.md", "Contribution Guide")}</li>
@@ -735,8 +762,8 @@ function SchemaOrg() {
             <h4>Updating</h4>
             <ol>
               <li>cd <b>packages/{kebab}</b></li>
-              <li>Copy the new <b>README</b> over README.md</li>
-              <li>Copy the new <b>Schema</b> into schemas/{title}.json</li>
+              <li>Copy the new <b>README.md</b> over README.md</li>
+              <li>Copy <b>{title}.json</b> into <b>schemas/{title}.json</b></li>
               <li>Delete <b>schemas/BasicProfile.json</b></li>
               <li>Update package.json with the new model details</li>
               <li>Do some magic to make types/{title}.d.ts and src/model.ts appear</li>
