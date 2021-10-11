@@ -94,11 +94,14 @@ export function matchItemOrArray(elem, predicateCallback) {
     }
 }
 
-function getSubclassFields(startSubClass, data, options) {
+function getSubclassFields(startSubClass, data, options, context={}) {
     let initSubClassID = startSubClass['@id'];
     let initSubClassName = initSubClassID.split(':')[1];
 
     let {baseItem, fields, subClass} = getObjectFeatures(initSubClassName, data, options);
+
+    context.subClassFields = {};
+    context.subClassFields[initSubClassID] = fields;
 
     let allSubClassFields = fields;
 
@@ -109,6 +112,7 @@ function getSubclassFields(startSubClass, data, options) {
         let {baseItem: nextBaseItem, fields: nextFields, subClass: newNextSubclass} = getObjectFeatures(nextSubClassName, data, options);
         allSubClassFields = allSubClassFields.concat(nextFields);
         nextSubClass = newNextSubclass;
+        context.subClassFields[nextSubClassID] = nextFields;
     }
 
     return allSubClassFields;
@@ -163,10 +167,17 @@ export function jsonLdToJsonSchema(objectName, data, options, context={}) {
 
     let fields = ownFields;
 
-    if(options.useSubClasses && subClass) {
+    if(subClass) {
         if(subClass['@id']) {
-            let subClassFields = getSubclassFields(subClass, data, options, context);
-            fields = ownFields.concat(subClassFields);
+            getSubclassFields(subClass, data, options, context);
+            
+            if(options.subClassSelections) {
+                for(let id of Object.keys(options.subClassSelections)) {
+                    if(context.subClassFields[id]) {
+                        fields = fields.concat(context.subClassFields[id]);
+                    }
+                }
+            }
         }
     }
 

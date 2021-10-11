@@ -16,6 +16,7 @@
 }
 
 .csnTitle {
+    text-shadow: 4px 2px 2px hsl(200deg, 50%, 50%, 0.5);
     background: -webkit-linear-gradient(hsl(215deg, 89%, 71%) 0%, hsl(19deg, 100%, 64%) 44%, hsl(215deg, 85%, 67%) 44%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -218,7 +219,7 @@
 
 .csnModelTabs {
     display: flex;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid hsl(13deg, 100%, 50%);
     padding-top: 0.5em;
 }
 

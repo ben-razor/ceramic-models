@@ -40,7 +40,8 @@ function SchemaOrg() {
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
   const [jsonSchemaWithFieldsChosen, setJSONSchemaWithFieldsChosen] = useState('');
-  const [options, setOptions] = useState({ expanded: {} });
+  const [options, setOptions] = useState({ expanded: {}, subClassSelections: {} });
+  const [subClassFields, setSubClassFields] = useState({});
   const [creatingModel, setCreatingModel] = useState(false);
   const [editingField, setEditingField] = useState();
   const [editingProperties, setEditingProperties] = useState({});
@@ -88,10 +89,15 @@ function SchemaOrg() {
     }
   }, [data, type, searchQuery]);
 
+  function copyObj(o) {
+    return JSON.parse(JSON.stringify(o));
+  }
+
   useEffect(() => {
     if(selectedObject && data) {
       let context = { idIndex, fieldIndex };
       let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data, options, context);
+      setSubClassFields(copyObj(context.subClassFields));
       setJSONSchema(_jsonSchemaObj);
     }
   }, [selectedObject, data, options, idIndex, fieldIndex]);
@@ -172,9 +178,9 @@ function SchemaOrg() {
           if(k !== 'path') {
             if(k === 'required') {
               if(!schema.required) {
-                curProperties.required = [];
+                schema.required = [];
               }
-              curProperties.required.push(pathParts.slice(-1)[0]);
+              schema.required.push(pathParts.slice(-1)[0]);
             }
             else {
               let prop = details[k];
@@ -294,11 +300,15 @@ function SchemaOrg() {
   function goBack() {
     setJSONSchema('');
     setSelectedObject('');
+    setSelectedFields({});
     setEditingField('');
     setEditingProperties({});
     setEditedProperties({});
     setAllEditedProperties({});
     setCreatingModel(false);
+    let _options = {...options};
+    _options.subClassSelections = {};
+    setOptions(_options);
   }
 
   function goBackEditModel() {
@@ -362,16 +372,16 @@ function SchemaOrg() {
 
   useEffect(() => {
     if(editingField) {
-      if(!allEditedProperties[editingField]) {
+      if(allEditedProperties[editingField]) {
+        setEditingProperties({...allEditedProperties[editingField]});
+      }
+      else {
         let currentProperties = getCurrentProperties(editingField);
         if(currentProperties && currentProperties[editingField]) {
           setEditingProperties({
             type: currentProperties[editingField].type
           })
         }
-      }
-      else {
-        setEditingProperties({...allEditedProperties[editingField]});
       }
     }
   }, [editingField, getCurrentProperties, allEditedProperties])
@@ -408,7 +418,7 @@ function SchemaOrg() {
               <span style={{opacity: 0}}>&#x25B2;</span> 
             )
           }
-          <input type="checkbox" value={selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
+          <input type="checkbox" checked={selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
           <span onClick={e => setEditingField(propertyPath)}>
             {property}
           </span>
@@ -454,6 +464,7 @@ function SchemaOrg() {
   }
 
   function displaySchema(jsonSchema, options={}) {
+    let title = jsonSchema['title'];
     let propertyUI = [];
 
     let context = { 
@@ -465,8 +476,17 @@ function SchemaOrg() {
       doPropertyDisplayRecursion(propertyUI, jsonSchema.properties, options, context);
     }
 
+    let numProps = Object.keys(jsonSchema.properties).length;
+
+    if(numProps === 0) {
+      propertyUI = <div>
+        <h4>{title} has no properties.</h4>
+        <p>Select a Sub Class to add sub class properties.</p>
+      </div>
+    }
+
     return <div>
-      <h3>{jsonSchema['title']}</h3>
+      <h3>{title}</h3>
       <div>{processDescription(jsonSchema['description'])}</div>
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
@@ -590,6 +610,43 @@ function SchemaOrg() {
     return editFields;
   }
 
+  function changeSettingSubClassSelection(id, checked) {
+    let _options = {...options};
+    let _subClassSelections = {..._options.subClassSelections};
+
+    if(checked) {
+      _subClassSelections[id] = true;
+    }
+    else {
+      delete _subClassSelections[id];
+    }
+
+    _options.subClassSelections = _subClassSelections;
+
+    setOptions(_options);
+  }
+
+  function getSubClassSelector() {
+    let subClassLines = [];
+
+    for(let subClassID of Object.keys(subClassFields)) {
+      let propertyName = subClassID.split(':')[1];
+      let subClassLine = <div className={styles.csnSchemaSettingRow}>
+        <div className={styles.csnSchemaSettingLabel}>
+          {propertyName}
+        </div>
+        <div className={styles.csnSchemaSettingControl}>
+          <input type="checkbox" checked={options.subClassSelections[subClassID]} 
+                 onChange={e => changeSettingSubClassSelection(subClassID, e.target.checked)} />
+        </div>
+      </div>;
+
+      subClassLines.push(subClassLine);
+    }
+
+    return subClassLines;
+  }
+
   function getSchemaPage() {
     let currentProperties = getCurrentProperties(editingField);
 
@@ -606,7 +663,7 @@ function SchemaOrg() {
             </div>
           </div>
           <div className={styles.csnSchemaControls}>
-            <h3>Schema Controls</h3>
+            <h3>Use Sub Class</h3>
             <form>
 
               {/*
@@ -615,19 +672,13 @@ function SchemaOrg() {
                   Show descriptions:
                 </div>
                 <div className={styles.csnSchemaSettingControl}>
-                  <input type="checkbox" value={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
+                  <input type="checkbox" checked={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
                 </div>
               </div>
               */}
 
-              <div className={styles.csnSchemaSettingRow}>
-                <div className={styles.csnSchemaSettingLabel}>
-                  Use sub class fields:
-                </div>
-                <div className={styles.csnSchemaSettingControl}>
-                  <input type="checkbox" value={useSubClasses} onChange={e => changeSettingUseSubClasses(e.target.checked)} />
-                </div>
-              </div>
+              { getSubClassSelector() }
+
               {/*
                 <div className={styles.csnSchemaSettingRow}>
                   <div className={styles.csnSchemaSettingLabel}>
@@ -662,6 +713,7 @@ function SchemaOrg() {
                         <option value="integer">Integer</option>
                         <option value="boolean">Boolean</option>
                         <option value="array">Array</option>
+                        <option value="object">Object</option>
                       </select>
                     </div>
                   </div>
@@ -671,7 +723,7 @@ function SchemaOrg() {
                       Required 
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
-                      <input type="checkbox" onChange={e => handlePropertyEdited('required', e.target.checked)} />
+                      <input type="checkbox" checked={editingProperties.required} onChange={e => handlePropertyEdited('required', e.target.checked)} />
                     </div>
                   </div>
 
