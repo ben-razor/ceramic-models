@@ -9,6 +9,9 @@ body {
   font-family: 'Azulejo', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   background-size: 100%;
+  background-image: url(/azulejo/ceramic-logo-bg-rot-scale-1.png);
+  background-repeat: repeat;
+  background-size: 50px;
 }
 
 a {

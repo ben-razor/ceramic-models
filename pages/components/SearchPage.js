@@ -1,16 +1,16 @@
 import { useEffect, useState, useCallback, Fragment } from 'react';
-import { getByType, jstr } from './JsonLd';
+import { getByType, matchItemOrArray, jstr } from './JsonLd';
 
 function SearchPage(props) {
   let data = props.data;
   let type = props.type;
-  let searchQuery = props.searchQuery;
   let styles = props.styles;
   let setType = props.setType;
   let processDescription = props.processDescription;
   let selectObject = props.selectObject;
 
   const [typeSearchResults, setTypeSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if(data && type) {

@@ -37,7 +37,6 @@ function SchemaOrg() {
   const [fieldIndex, setFieldIndex] = useState();
   const [enteredType, setEnteredType] = useState('');
   const [type, setType] = useState('Class');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
   const [jsonSchemaWithFieldsChosen, setJSONSchemaWithFieldsChosen] = useState('');
@@ -160,7 +159,9 @@ function SchemaOrg() {
             }
             else {
               if(validPropertiesAllTypes.includes(k) || validTypeProps.includes(k)) {
-                curProperties[k] = details[k];
+                if(details[k]) {
+                  curProperties[k] = details[k];
+                }
               }
             }
           }
@@ -299,13 +300,40 @@ function SchemaOrg() {
       else {
         let currentProperties = jsonSchema.properties[editingField];
         if(currentProperties) {
-          setEditingProperties({
-            type: currentProperties.type
-          })
+          let initProperties = initAllProperties(currentProperties.type);
+          setEditingProperties(initProperties);
         }
       }
     }
   }, [editingField, jsonSchema, allEditedProperties])
+
+  useEffect(() => {
+    if(editingField && editingProperties.type) {
+
+      if(allEditedProperties[editingField] && allEditedProperties[editingField].type === editingProperties.type) {
+        setEditingProperties({...allEditedProperties[editingField]});
+      }
+      else {
+        let currentProperties = jsonSchema.properties[editingField];
+        if(currentProperties) {
+          let initProperties = initAllProperties(editingProperties.type);
+          setEditingProperties(initProperties);
+        }
+      }
+    }
+  }, [editingField, jsonSchema, allEditedProperties, editingProperties.type])
+
+
+  function initAllProperties(type) {
+    let initProperties = {
+      type: type
+    }
+
+    for(let prop of validTypeProperties[type]) {
+      initProperties[prop] = '';
+    }
+    return initProperties;
+  }
 
   function processDescription(description) {
     if(description) {
@@ -457,6 +485,16 @@ function SchemaOrg() {
     _editingProperties[field] = value;
     setEditingProperties(_editingProperties);
   }
+
+  useEffect(() => {
+    console.log('type changed');
+    let newType = editingProperties.type;
+
+    if(!allEditedProperties[editingField]) {
+      
+    }
+
+  }, [editingProperties.type])
 
   function getPropertyEditFields(type) {
     let editFields;
@@ -648,7 +686,7 @@ function SchemaOrg() {
                       Type
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
-                      <select value={editingProperties.type || currentProperties.type} onChange={e => handlePropertyEdited('type', e.target.value)}>
+                      <select value={editingProperties.type} onChange={e => handlePropertyEdited('type', e.target.value)}>
                         <option value="string">String</option>
                         <option value="number">Number</option>
                         <option value="integer">Integer</option>
@@ -778,7 +816,7 @@ function SchemaOrg() {
     }
     else {
       content = <SearchPage type={type} styles={styles} setType={setType} selectObject={selectObject}
-                            data={data} searchQuery={searchQuery} processDescription={processDescription} />;
+                            data={data} processDescription={processDescription} />;
     }
 
     return content;
