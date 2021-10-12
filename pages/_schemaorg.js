@@ -531,6 +531,12 @@ function SchemaOrg() {
         </div>
       </div>
     }
+    else if(type === 'object') {
+      editFields = <div>
+        <h4>Editing of sub objects is not implemented.</h4>
+        <h4>They must be added after the schema is created.</h4>
+      </div>
+    }
 
     return editFields;
   }
@@ -716,19 +722,7 @@ function SchemaOrg() {
             </div>
           </div>
           <div className={styles.csnModelControls}>
-            {/*
-            <h3>Ceramic Data Model</h3>
-            <p>
-              Ceramic Data Models are schemas along with some metadata and supporting documents to make interacting with the schemas easier.
-            </p>
-            <p>
-              They are wrapped in npm packages so that they can be easily reused within different applications.
-            </p>
-            <p>
-              Community Data Models are stored in a {getLink("https://github.com/ceramicstudio/datamodels", "Github Repository")}.
-            </p>
-            */}
-           
+          
             <h3>Creating Your Data Model</h3>
             <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>
@@ -787,7 +781,7 @@ function SchemaOrg() {
           AZULEJO
         </h1>
         <div>
-          <Image alt="Ceramic Logo" src="/azulejo/ceramic-logo-200x200-1.png" width="32" height="32" />
+          <Image alt="Ceramic Logo" src="/azulejo/azulejo-logo-200x200-1.png" width="32" height="32" />
         </div>
         <h2 className={styles.csnSubTitle}>
           schema.org &rArr; JSON Schema &rArr; Ceramic Data Models
