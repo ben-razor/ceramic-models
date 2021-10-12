@@ -20,6 +20,7 @@
     "@glazed/devtools": "^0.1.3",
     "@glazed/did-datastore": "^0.1.4",
     "camel-to-kebab": "^1.1.0",
+    "clipboard": "^2.0.8",
     "dids": "^2.4.0",
     "file-loader": "^6.2.0",
     "next": "11.1.2",

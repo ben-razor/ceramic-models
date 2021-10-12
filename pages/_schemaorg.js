@@ -12,6 +12,7 @@ import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatu
 import { prettyPrintJson } from 'pretty-print-json';
 import camelToKebabCase from "camel-to-kebab";
 import template from './data/markdown/template.md';
+import ClipboardJS from 'clipboard';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
@@ -449,6 +450,10 @@ function SchemaOrg() {
     </div>;
   }
 
+  function copyToClipboard(val) {
+    navigator.clipboard.writeText(val);
+  }
+  
   function displaySchemaForCreateModel(jsonSchema, options={}) {
     let propertyUI = [];
 
@@ -460,7 +465,7 @@ function SchemaOrg() {
     return <div>
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
-        <div className={styles.csnJSONEditorModelDisplay}>
+        <div className={styles.csnJSONEditorModelDisplay} id="outputSchema" onClick={e => copyOutputToClipboard(e, 'schema')}>
           { JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"') } 
         </div>
       </div>
@@ -738,6 +743,19 @@ function SchemaOrg() {
     return replacedTemplate;
   }
 
+  function copyOutputToClipboard(e, type) {
+    console.log('copy', type);
+    if(type === 'schema') {
+      let content = JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"');
+      copyToClipboard(content);
+    }
+    else if(type === 'readme') {
+      let replacedTemplate = replaceMarkdownTemplate(template, jsonSchema);
+      copyToClipboard(replacedTemplate);
+    }
+    e.stopPropagation();
+  }
+
   function getCreateModelPage() {
     let title = jsonSchema['title'];
     let kebab = camelToKebabCase(title);
@@ -762,11 +780,17 @@ function SchemaOrg() {
                   README.md
                 </div>
               </div>
-              <div className={styles.csnModelPanel} style={ { display: (modelTab === 'schema' ? 'initial' : 'none') }}>
+              <div className={styles.csnModelPanel} style={ { display: (modelTab === 'schema' ? 'block' : 'none'), position: 'relative' }}>
+                <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'schema')}>
+                  <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+                </div>
                 { displaySchemaForCreateModel(jsonSchema, options) }
               </div>
-              <div style={ { display: (modelTab === 'readme' ? 'initial' : 'none') }}>
-                <pre className={styles.csnMarkdownDisplay} >
+              <div style={ { display: (modelTab === 'readme' ? 'block' : 'none'), position: 'relative' }}>
+                <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
+                  <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+                </div>
+                <pre className={styles.csnMarkdownDisplay} id="outputReadme" onClick={e => copyOutputToClipboard(e, 'readme')}>
                   {replacedTemplate}
                 </pre>
               </div>
