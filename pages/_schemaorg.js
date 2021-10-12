@@ -141,6 +141,9 @@ function SchemaOrg() {
         if(curProperties[part]) {
           curProperties = curProperties[part];
         }
+        else {
+          curProperties = null;
+        }
       }
 
       if(curProperties) { 
