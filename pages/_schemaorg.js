@@ -51,6 +51,10 @@ function SchemaOrg() {
   const [selectedProperties, setSelectedProperties] = useState({});
   const [modelTab, setModelTab] = useState('schema');
 
+  const [origTitle, setOrigTitle] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
   const [showDescriptions, setShowDescriptions] = useState(false);
   const [showMainDescription, setShowMainDescription] = useState(true);
   const [useSubClasses, setUseSubClasses] = useState(false);
@@ -79,8 +83,13 @@ function SchemaOrg() {
       let _jsonSchemaObj = jsonLdToJsonSchema(selectedObject, data, options, context);
       setSubClassFields(copyObj(context.subClassFields));
       setJSONSchema(_jsonSchemaObj);
+      if(_jsonSchemaObj.title !== origTitle) {
+        setOrigTitle(_jsonSchemaObj.title);
+        setTitle(_jsonSchemaObj.title);
+        setDescription(_jsonSchemaObj.description);
+      }
     }
-  }, [selectedObject, data, options, idIndex, fieldIndex]);
+  }, [selectedObject, data, options, idIndex, fieldIndex, origTitle]);
 
   useEffect(() => {
     if(jsonSchema) {
@@ -98,6 +107,9 @@ function SchemaOrg() {
         overwriteSchemaProperties(_jsonSchema, editedProps);
       }
 
+      _jsonSchema['title'] = title;
+      _jsonSchema['description'] = description;
+
       if(!showMainDescription) {
         delete _jsonSchema['description'];
       }
@@ -108,7 +120,7 @@ function SchemaOrg() {
       setJSONSchemaWithFieldsChosen(_jsonSchema);
     }
 
-  }, [jsonSchema, selectedProperties, allEditedProperties ]);
+  }, [jsonSchema, selectedProperties, allEditedProperties, title, description ]);
 
   const copyObjectProperties = function(origProperties, newProperties, fields) {
     let field = fields[0];
@@ -137,8 +149,6 @@ function SchemaOrg() {
 
     if(schema && path) {
       let pathParts = path.split('/');
-      console.log(pathParts);
-      console.log(schema.properties);
       let curProperties = schema.properties;
 
       for(let part of pathParts) {
@@ -420,7 +430,6 @@ function SchemaOrg() {
   }
 
   function displaySchema(jsonSchema, options={}) {
-    let title = jsonSchema['title'];
     let propertyUI = [];
 
     let context = { 
@@ -442,8 +451,10 @@ function SchemaOrg() {
     }
 
     return <div>
-      <h3>{title}</h3>
-      <div>{processDescription(jsonSchema['description'])}</div>
+      <h3><input type="text" className={styles.csnModelTitle} value={title} onChange={e => setTitle(e.target.value)} /></h3>
+      <div>
+        <textarea type="text" className={styles.csnModelDescription} value={description} onChange={e => setDescription(e.target.value)} />
+      </div>
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
         <div className={styles.csnJSONEditorDisplay}>
@@ -653,7 +664,6 @@ function SchemaOrg() {
             </div>
           </div>
           <div className={styles.csnSchemaControls}>
-            <h3>Use Sub Class</h3>
             <form>
 
               {/*
@@ -667,8 +677,9 @@ function SchemaOrg() {
               </div>
               */}
 
+              <h3>Use Sub Class</h3>
               { getSubClassSelector() }
-
+              
               {/*
                 <div className={styles.csnSchemaSettingRow}>
                   <div className={styles.csnSchemaSettingLabel}>
@@ -682,8 +693,9 @@ function SchemaOrg() {
                   </div>
                 </div>
               */}
-             
+
             </form>
+
             {(editingField && currentProperties) && 
               <div>
                 <h3>Property Controls</h3>

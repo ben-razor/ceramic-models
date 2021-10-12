@@ -257,3 +257,30 @@
     right: 20px; 
     top: 20px;
 }
+
+.csnModelTitle {
+    color: white;
+    background-color: hsla(30, 100%, 10%, 1);
+    padding-left: 0.25em;
+    border: 1px solid darkgrey;
+    border-radius: 0.5em;
+}
+
+.csnModelDescription {
+    width: 100%;
+    color: white;
+    padding-left: 0.25em;
+    background-color: hsla(30, 100%, 10%, 1);
+    border: 1px solid darkgrey;
+    border-radius: 0.5em;
+}
+
+.csnModelTitle:focus {
+    background-color: white;
+    color: black;
+}
+
+.csnModelDescription:focus {
+    background-color: white;
+    color: black;
+}
