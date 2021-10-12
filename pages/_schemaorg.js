@@ -19,11 +19,12 @@ const MAX_RESULTS = 20;
 const validPropertiesAllTypes = ['type', 'required'];
 
 const validTypeProperties = {
-  'string': ['pattern', 'minLength', 'maxLength'],
+  'string': ['pattern', 'format', 'minLength', 'maxLength'],
   'number': ['minimum', 'maximum'],
   'integer': ['minimum', 'maximum'],
   'boolean': [],
-  'array': ['minItems', 'maxItems']
+  'array': ['minItems', 'maxItems'],
+  'object': ['properties']
 }
 
 const markdownTableRow = '| `{{name}}` | {{desc}} | {{type}} | {{max_size}} | {{optional}} | {{example}} |';
@@ -47,7 +48,7 @@ function SchemaOrg() {
   const [editingProperties, setEditingProperties] = useState({});
   const [editedProperties, setEditedProperties] = useState({});
   const [allEditedProperties, setAllEditedProperties] = useState({});
-  const [selectedFields, setSelectedFields] = useState({});
+  const [selectedProperties, setSelectedProperties] = useState({});
   const [modelTab, setModelTab] = useState('schema');
 
   const [showDescriptions, setShowDescriptions] = useState(false);
@@ -85,7 +86,7 @@ function SchemaOrg() {
     if(jsonSchema) {
       let _jsonSchema = JSON.parse(JSON.stringify(jsonSchema));
       _jsonSchema.properties = { };
-      let fields = Object.keys(selectedFields);
+      let fields = Object.keys(selectedProperties);
 
       for(let path of fields) {
         let pathParts = path.split('/');
@@ -104,7 +105,7 @@ function SchemaOrg() {
       setJSONSchemaWithFieldsChosen(_jsonSchema);
     }
 
-  }, [jsonSchema, selectedFields, allEditedProperties ]);
+  }, [jsonSchema, selectedProperties, allEditedProperties ]);
 
   const copyObjectProperties = function(origProperties, newProperties, fields) {
     let field = fields[0];
@@ -139,12 +140,7 @@ function SchemaOrg() {
 
       for(let part of pathParts) {
         if(curProperties[part]) {
-          if(curProperties[part].properties) {
-            curProperties = curProperties[part].properties;
-          }
-          else {
-            curProperties = curProperties[part];
-          }
+          curProperties = curProperties[part];
         }
       }
 
@@ -225,7 +221,7 @@ function SchemaOrg() {
  function goBack() {
     setJSONSchema('');
     setSelectedObject('');
-    setSelectedFields({});
+    setSelectedProperties({});
     setEditingField('');
     setEditingProperties({});
     setEditedProperties({});
@@ -283,15 +279,15 @@ function SchemaOrg() {
     setOptions(_options);
   }
 
-  function selectField(property, selected) {
-    let _selectedFields = {...selectedFields};
+  function selectProperty(property, selected) {
+    let _selectedProperties = {...selectedProperties};
     if(selected) {
-      _selectedFields[property] = selected;
+      _selectedProperties[property] = selected;
     }
     else {
-      delete _selectedFields[property];
+      delete _selectedProperties[property];
     }
-    setSelectedFields(_selectedFields);
+    setSelectedProperties(_selectedProperties);
     setEditingField(property)
   }
 
@@ -343,7 +339,7 @@ function SchemaOrg() {
               <span style={{opacity: 0}}>&#x25B2;</span> 
             )
           }
-          <input type="checkbox" checked={selectedFields[propertyPath]} onChange={e => selectField(propertyPath, e.target.checked)}></input>
+          <input type="checkbox" checked={selectedProperties[propertyPath]} onChange={e => selectProperty(propertyPath, e.target.checked)}></input>
           <span onClick={e => setEditingField(propertyPath)}>
             {property}
           </span>
