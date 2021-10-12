@@ -52,7 +52,7 @@ function SchemaOrg() {
   const [modelTab, setModelTab] = useState('schema');
 
   const [showDescriptions, setShowDescriptions] = useState(false);
-  const [showMainDescription, setShowMainDescription] = useState(false);
+  const [showMainDescription, setShowMainDescription] = useState(true);
   const [useSubClasses, setUseSubClasses] = useState(false);
   const [recursionLevels, setRecursionLevels] = useState(0);
 
@@ -98,8 +98,11 @@ function SchemaOrg() {
         overwriteSchemaProperties(_jsonSchema, editedProps);
       }
 
-      if(!options.showMainDescription) {
+      if(!showMainDescription) {
         delete _jsonSchema['description'];
+      }
+      else {
+        _jsonSchema['description'] = _jsonSchema['description'].substr(0, 200);
       }
       
       setJSONSchemaWithFieldsChosen(_jsonSchema);
@@ -748,7 +751,7 @@ function SchemaOrg() {
     for(let name of Object.keys(properties)) {
       let props = properties[name];
       let desc = props.description || '';
-      let type = props.type;
+      let type = props.type || '';
       let maxSize = '';
       let required = (requiredFields.includes(name)).toString();
       let example = '';
@@ -769,7 +772,7 @@ function SchemaOrg() {
       copyToClipboard(content);
     }
     else if(type === 'readme') {
-      let replacedTemplate = replaceMarkdownTemplate(template, jsonSchema);
+      let replacedTemplate = replaceMarkdownTemplate(template, jsonSchemaWithFieldsChosen);
       copyToClipboard(replacedTemplate);
     }
     e.stopPropagation();
@@ -779,7 +782,7 @@ function SchemaOrg() {
     let title = jsonSchema['title'];
     let kebab = camelToKebabCase(title);
 
-    let replacedTemplate = replaceMarkdownTemplate(template, jsonSchema);
+    let replacedTemplate = replaceMarkdownTemplate(template, jsonSchemaWithFieldsChosen);
 
     let createModelPage = <div className={styles.csnSchemaPage}>
       <div>
