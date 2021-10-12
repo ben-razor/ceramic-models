@@ -590,7 +590,7 @@ function SchemaOrg() {
           </div>
         </div>
         <h4>Editing of sub objects is not implemented.</h4>
-        <h4>They must be added after the schema is created.</h4>
+        <h4>They can be added after the schema is created.</h4>
       </div>
     }
 
