@@ -8,11 +8,9 @@
 }
 
 .csnSubTitle {
-    background: -webkit-linear-gradient(hsl(19deg, 100%, 64%) 0%, hsl(19deg, 100%, 64%) 44%,  hsl(13deg, 100%, 50%) 44%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     margin: 0;
     padding: 0.4em;
+    color: hsl(200deg, 20%, 60%);
 }
 
 .csnTitle {
@@ -22,6 +20,7 @@
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 1px white;
     margin: 0;
+    letter-spacing: 10px;
 }
 
 .csnContent {
@@ -273,6 +272,7 @@
     background-color: hsla(30, 100%, 10%, 1);
     border: 1px solid darkgrey;
     border-radius: 0.5em;
+    box-sizing: border-box;
 }
 
 .csnModelTitle:focus {

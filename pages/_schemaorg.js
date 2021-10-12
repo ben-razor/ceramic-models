@@ -17,7 +17,7 @@ import ClipboardJS from 'clipboard';
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
 
-const validPropertiesAllTypes = ['type', 'required'];
+const validPropertiesAllTypes = ['type', 'required', 'description'];
 
 const validTypeProperties = {
   'string': ['pattern', 'format', 'minLength', 'maxLength'],
@@ -161,7 +161,11 @@ function SchemaOrg() {
       }
 
       if(curProperties) { 
-        Object.keys(curProperties).forEach(function(key) { delete curProperties[key]; });
+        Object.keys(curProperties).forEach(function(key) { 
+          if(key !== 'description') {
+            delete curProperties[key]; 
+          }
+        });
         for(let k of Object.keys(details)) {
           let type = details['type'];
           let validTypeProps = validTypeProperties[type] || [];
@@ -666,20 +670,20 @@ function SchemaOrg() {
           <div className={styles.csnSchemaControls}>
             <form>
 
-              {/*
+              {
               <div className={styles.csnSchemaSettingRow}>
                 <div className={styles.csnSchemaSettingLabel}>
-                  Show descriptions:
+                  Property descriptions
                 </div>
                 <div className={styles.csnSchemaSettingControl}>
                   <input type="checkbox" checked={showDescriptions} onChange={e => changeSettingShowDesc(e.target.checked)} />
                 </div>
               </div>
-              */}
+              }
 
               <h3>Use Sub Class</h3>
               { getSubClassSelector() }
-              
+
               {/*
                 <div className={styles.csnSchemaSettingRow}>
                   <div className={styles.csnSchemaSettingLabel}>
