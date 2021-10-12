@@ -736,10 +736,29 @@ function SchemaOrg() {
   function replaceMarkdownTemplate(template, jsonSchema) {
     let title = jsonSchema['title'];
     let description = jsonSchema['description'];
+    let requiredFields = jsonSchema['required'] || [];
     let kebab = camelToKebabCase(title);
     let replacedTemplate = template.replaceAll('{{title}}', title);
     replacedTemplate = replacedTemplate.replaceAll('{{slug}}', kebab);
     replacedTemplate = replacedTemplate.replaceAll('{{description}}', description);
+
+    let properties = jsonSchema['properties'];
+    let fields = [];
+
+    for(let name of Object.keys(properties)) {
+      let props = properties[name];
+      let desc = props.description || '';
+      let type = props.type;
+      let maxSize = '';
+      let required = (requiredFields.includes(name)).toString();
+      let example = '';
+      
+      let propLine = `${name}|${desc}|${type}|${maxSize}|${required}|${example}|`;
+      fields.push(propLine);
+    }
+
+    replacedTemplate = replacedTemplate.replaceAll('{{fields}}', fields.join('\n'));
+
     return replacedTemplate;
   }
 
