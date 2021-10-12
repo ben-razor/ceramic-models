@@ -7,7 +7,8 @@ import { ThreeIdConnect,  EthereumAuthProvider } from '@3id/connect'
 import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { DID } from 'dids'
 import DataModels from './components/DataModels';
-import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema } from './components/JsonLd';
+import SearchPage from './components/SearchPage';
+import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema, jstr } from './components/JsonLd';
 import { prettyPrintJson } from 'pretty-print-json';
 import camelToKebabCase from "camel-to-kebab";
 import template from './data/markdown/template.md';
@@ -35,7 +36,6 @@ function SchemaOrg() {
   const [fieldIndex, setFieldIndex] = useState();
   const [enteredType, setEnteredType] = useState('');
   const [type, setType] = useState('Class');
-  const [typeSearchResults, setTypeSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
@@ -67,27 +67,6 @@ function SchemaOrg() {
     })();
 
   }, []);
-
-  useEffect(() => {
-    if(data && type) {
-      let _typeSearchResults = getByType(type, data);
-
-      if(searchQuery) {
-        _typeSearchResults = _typeSearchResults.filter(x => {
-          let idMatch = matchItemOrArray(x['@id'], val => val.toLowerCase().includes(searchQuery))
-
-          let descMatch = matchItemOrArray(x['rdfs:comment'], val => {
-            if(typeof val === 'string') {
-              return val.toLowerCase().includes(searchQuery)
-            }
-          });
-          return idMatch || descMatch;
-        })
-      }
-
-      setTypeSearchResults(_typeSearchResults);
-    }
-  }, [data, type, searchQuery]);
 
   function copyObj(o) {
     return JSON.parse(JSON.stringify(o));
@@ -233,21 +212,6 @@ function SchemaOrg() {
     setSelectedObject(name);
   }
 
-  function getDataPanel() {
-    return <div className="sorgDataPanel">
-      { !data && 'Data loading...' } 
-    </div>;
-  }
-
-  function handleTypeFormSubmit(e) {
-    setType(enteredType);
-    e.preventDefault();
-  }
-
-  function jstr(val) {
-    return JSON.stringify(val);
-  }
-
   function getTypeSearchForm() {
     return <form onSubmit={handleTypeFormSubmit}>
       <label>
@@ -258,49 +222,7 @@ function SchemaOrg() {
     </form>;
   }
 
-  function getSearchForm() {
-    return <form onSubmit={handleTypeFormSubmit}>
-      <input className={styles.csnObjectTypeSearch} type="text" value={searchQuery} 
-             onChange={e => setSearchQuery(e.target.value.toLowerCase())} 
-             placeholder="Search Object Type..." />
-    </form>;
-  }
-
-  function getTypeSearchPanel() {
-    let typeSearchResultsUI = [];
-    for(let val of typeSearchResults) {
-      let id = val['@id'];
-      let name = id.split(':')[1];
-      let comment = val['rdfs:comment'];
-      if(typeof comment === 'object') {
-        comment = jstr(comment);
-      }
-      typeSearchResultsUI.push(
-        <div className={styles.searchResult} key={name}>
-          <div onClick={e => selectObject(name)} className={styles.searchResultName}>
-            <div className={styles.csnTextEllipsis}> 
-              {name}
-            </div>
-          </div>
-          <div className={styles.searchResultDesc}>
-            {processDescription(comment)}
-          </div>
-        </div>
-      )
-    }
-    let foundResults = typeSearchResults.length > 0;
-
-    return <div className={styles.sorgTypeSearchPanel}>
-      <div>
-        { getSearchForm() }
-      </div>
-      <div className="sorgTypeSearchResults">
-        { typeSearchResultsUI }
-      </div>
-    </div>
-  }
-
-  function goBack() {
+ function goBack() {
     setJSONSchema('');
     setSelectedObject('');
     setSelectedFields({});
@@ -840,19 +762,6 @@ function SchemaOrg() {
     return createModelPage;
   }
 
-  function getSearchPage() {
-    let searchPage = <div className="csnSearchPage">
-      <div>
-        {getDataPanel()}
-      </div>
-      <div>
-        {getTypeSearchPanel()}
-      </div>
-    </div>;
-
-    return searchPage;
-  }
-
   function getPageContent() {
     let content;
     if(jsonSchema) {
@@ -864,7 +773,8 @@ function SchemaOrg() {
       }
     }
     else {
-      content = getSearchPage();
+      content = <SearchPage type={type} styles={styles} setType={setType} selectObject={selectObject}
+                            data={data} searchQuery={searchQuery} processDescription={processDescription} />;
     }
 
     return content;

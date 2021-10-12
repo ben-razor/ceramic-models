@@ -170,7 +170,7 @@ export function jsonLdToJsonSchema(objectName, data, options, context={}) {
     if(subClass) {
         if(subClass['@id']) {
             getSubclassFields(subClass, data, options, context);
-            
+
             if(options.subClassSelections) {
                 for(let id of Object.keys(options.subClassSelections)) {
                     if(context.subClassFields[id]) {
@@ -342,6 +342,10 @@ async function run(method) {
 
         }
     }
+}
+
+export function jstr(val) {
+    return JSON.stringify(val);
 }
 
 
