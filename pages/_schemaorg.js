@@ -149,16 +149,16 @@ function SchemaOrg() {
         for(let k of Object.keys(details)) {
           let type = details['type'];
           let validTypeProps = validTypeProperties[type] || [];
+          let prop = details[k];
 
           if(k !== 'path') {
-            if(k === 'required') {
+            if(k === 'required' && prop === true) {
               if(!schema.required) {
                 schema.required = [];
               }
               schema.required.push(pathParts.slice(-1)[0]);
             }
             else {
-              let prop = details[k];
               if(validPropertiesAllTypes.includes(k) || validTypeProps.includes(k)) {
                 curProperties[k] = details[k];
               }
@@ -439,6 +439,12 @@ function SchemaOrg() {
   function submitPropertyEdits(e) {
     let details = {...editingProperties};
     details.path = editingField;
+
+    // TODO: This is a fudge until sub object editing is implemented
+    if(details.type === 'object') {
+      details.properties = {};
+    }
+
     setEditedProperties(details);
     let _allEditedProperties = JSON.parse(JSON.stringify(allEditedProperties));
     _allEditedProperties[editingField] = details;
@@ -529,6 +535,14 @@ function SchemaOrg() {
     }
     else if(type === 'object') {
       editFields = <div>
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
+            Properties
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <input type="text" value={'{}'} disabled />
+          </div>
+        </div>
         <h4>Editing of sub objects is not implemented.</h4>
         <h4>They must be added after the schema is created.</h4>
       </div>
@@ -647,7 +661,7 @@ function SchemaOrg() {
 
                   <div className={styles.csnSchemaSettingRow}>
                     <div className={styles.csnSchemaSettingLabel}>
-                      Required 
+                      Required  
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
                       <input type="checkbox" checked={editingProperties.required} onChange={e => handlePropertyEdited('required', e.target.checked)} />
