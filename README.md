@@ -32,6 +32,8 @@ They are wrapped in npm packages so that they can be easily reused within differ
 
 [Example Basic Models Schema](https://github.com/ceramicstudio/datamodels/blob/main/packages/identity-profile-basic/schemas/BasicProfile.json)
 
+[CIP 11 Data Model Definitions](https://github.com/ceramicnetwork/CIP/blob/main/CIPs/CIP-11/CIP-11.md)
+
 ### JSON Schemas
 
 [JSON Schema](https://json-schema.org/learn/getting-started-step-by-step.html)
