@@ -42,7 +42,7 @@ function SearchPage(props) {
     return <form onSubmit={handleTypeFormSubmit}>
       <input className={styles.csnObjectTypeSearch} type="text" value={searchQuery} 
              onChange={e => setSearchQuery(e.target.value.toLowerCase())} 
-             placeholder="Search Object Type..." />
+             placeholder="Search schema.org..." />
     </form>;
   }
  

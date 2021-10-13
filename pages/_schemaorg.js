@@ -795,7 +795,6 @@ function SchemaOrg() {
   }
 
   function getCreateModelPage() {
-    let title = jsonSchema['title'];
     let kebab = camelToKebabCase(title);
 
     let replacedTemplate = replaceMarkdownTemplate(template, jsonSchemaWithFieldsChosen);
@@ -808,8 +807,8 @@ function SchemaOrg() {
         <div className={styles.csnModelContent}>
           <div className={styles.csnModelDisplay}>
             <div className={styles.csnJSON}>
-              <h3>Data Model: {jsonSchema['title']}</h3>
-              <div>{processDescription(jsonSchema['description'])}</div>
+              <h3>Data Model: {title}</h3>
+              <div>{description}</div>
               <div className={styles.csnModelTabs}>
                 <div onClick={() => setModelTab('schema')} className={styles.csnModelTab + ' ' + (modelTab === 'schema' && styles.csnModelTabSelected)}>
                   {title}.json
@@ -858,6 +857,9 @@ function SchemaOrg() {
             </ol>
             <h4>Finally</h4>
             <ol>
+              <li>cd to the **datamodels** root</li>
+              <li>yarn</li>
+              <li>yarn prepare</li>
               <li>Create a pull request on the {getLink("https://github.com/ceramicstudio/datamodels", "Data Model Repository")}</li>
             </ol>
 
