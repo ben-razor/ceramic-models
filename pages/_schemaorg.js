@@ -1,18 +1,11 @@
 import styles from '../styles/App.module.css'
-import CeramicClient from '@ceramicnetwork/http-client';
 import { useEffect, useState, useCallback, Fragment } from 'react';
 import Image from 'next/image';
-import ThreeIdResolver from '@ceramicnetwork/3id-did-resolver';
-import { ThreeIdConnect,  EthereumAuthProvider } from '@3id/connect'
-import { TileDocument } from '@ceramicnetwork/stream-tile'
-import { DID } from 'dids'
-import DataModels from './components/DataModels';
 import SearchPage from './components/SearchPage';
 import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema, jstr } from './components/JsonLd';
-import { prettyPrintJson } from 'pretty-print-json';
 import camelToKebabCase from "camel-to-kebab";
 import template from './data/markdown/template.md';
-import ClipboardJS from 'clipboard';
+import Ceramic from './Ceramic';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
@@ -50,6 +43,7 @@ function SchemaOrg() {
   const [allEditedProperties, setAllEditedProperties] = useState({});
   const [selectedProperties, setSelectedProperties] = useState({});
   const [modelTab, setModelTab] = useState('schema');
+  const [ceramicEnabled, setCeramicEnabled] = useState();
 
   const [origTitle, setOrigTitle] = useState('');
   const [title, setTitle] = useState('');
@@ -836,6 +830,9 @@ function SchemaOrg() {
           <div className={styles.csnModelControls}>
           
             <h3>Creating Your Data Model</h3>
+
+            <Ceramic />
+
             <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>
             <ol>
