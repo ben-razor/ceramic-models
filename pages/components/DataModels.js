@@ -28,6 +28,10 @@ function DataModels(props) {
                 await manager.createSchema(modelName, schema);
                 console.log('A CREATE SCHEMA') 
                 
+                let modelJSON = manager.toJSON();
+                console.log('model json', modelJSON);
+
+                /*
                 const publishedModel = await manager.toPublished();                 
                 setPublished(publishedModel);
 
@@ -36,11 +40,10 @@ function DataModels(props) {
                 const dataStore = new DIDDataStore({ ceramic, model });
                 await dataStore.set('basicProfile', { record: 'content' }); 
                 const basicProfile = await dataStore.get('basicProfile');
+                */
 
-                console.log('model json', manager.toJSON());
-
-                setSchemaURL(schemaURL);
-                setBasicProfile(JSON.stringify(basicProfile));
+                // setSchemaURL(schemaURL);
+                setBasicProfile(JSON.stringify(modelJSON));
             })();
         }
     }, [ceramic, setPublished, schema]);
