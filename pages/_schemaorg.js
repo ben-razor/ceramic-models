@@ -5,6 +5,8 @@ import SearchPage from './components/SearchPage';
 import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema, jstr } from './components/JsonLd';
 import camelToKebabCase from "camel-to-kebab";
 import template from './data/markdown/template.md';
+import modelTemplate from './data/templates/model_ts.txt';
+import packageJSONTemplate from './data/templates/package_json.txt';
 import Ceramic from './Ceramic';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
@@ -790,6 +792,9 @@ function SchemaOrg() {
 
   function getCreateModelPage() {
     let kebab = camelToKebabCase(title);
+
+    console.log(modelTemplate);
+    console.log(packageJSONTemplate);
 
     let replacedTemplate = replaceMarkdownTemplate(template, jsonSchemaWithFieldsChosen);
 
