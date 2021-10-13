@@ -478,7 +478,7 @@ function SchemaOrg() {
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
         <div className={styles.csnJSONEditorModelDisplay} id="outputSchema" onClick={e => copyOutputToClipboard(e, 'schema')}>
-          { JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"') } 
+          { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
         </div>
       </div>
     </div>;
@@ -815,7 +815,7 @@ function SchemaOrg() {
                 <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'schema')}>
                   <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
                 </div>
-                { displaySchemaForCreateModel(jsonSchema, options) }
+                { displaySchemaForCreateModel(jsonSchemaWithFieldsChosen, options) }
               </div>
               <div style={ { display: (modelTab === 'readme' ? 'block' : 'none'), position: 'relative' }}>
                 <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
@@ -831,7 +831,7 @@ function SchemaOrg() {
           
             <h3>Creating Your Data Model</h3>
 
-            <Ceramic />
+            <Ceramic schema={jsonSchemaWithFieldsChosen} />
 
             <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>
