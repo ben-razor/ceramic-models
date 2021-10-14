@@ -813,11 +813,20 @@ function SchemaOrg() {
       let replacedTemplate = replaceTemplate(type, template, jsonSchemaWithFieldsChosen, extraInfo);
       copyToClipboard(replacedTemplate);
     }
+    else if(type === 'packageJSON') {
+      let replacedTemplate = replacePackageJSON();
+      copyToClipboard(replacedTemplate);
+    }
+    else if(type === 'modelTS') {
+      let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithFieldsChosen, {
+        'encodedModel': encodedModel}
+      );
+      copyToClipboard(replacedModelTS);
+    }
     e.stopPropagation();
   }
 
-  useEffect(() => {
-    if(jsonSchemaWithFieldsChosen) {
+  const replacePackageJSON = useCallback(() => {
       let keywordArray = keywords.split(',').map(x => x.trim());
       let keywordArrayJSON = JSON.stringify(keywordArray);
       let extraInfo = {
@@ -826,10 +835,16 @@ function SchemaOrg() {
         'keywords': keywordArrayJSON
       }
       let _replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithFieldsChosen, extraInfo);
+      return _replacedPackageJSON;
+  }, [author, version, jsonSchemaWithFieldsChosen, keywords, replaceTemplate]);
+
+  useEffect(() => {
+    if(jsonSchemaWithFieldsChosen) {
+      let _replacedPackageJSON = replacePackageJSON();
       setReplacedPackageJSON(_replacedPackageJSON);
     }
 
-  }, [ jsonSchemaWithFieldsChosen, setReplacedPackageJSON, author, version, keywords, replaceTemplate])
+  }, [ jsonSchemaWithFieldsChosen, replacePackageJSON, setReplacedPackageJSON, author, version, keywords, replaceTemplate])
 
   function getCreateModelPage() {
     let kebab = camelToKebabCase(title);
@@ -928,9 +943,9 @@ function SchemaOrg() {
               <li>cd <b>packages/{kebab}</b></li>
               <li>Copy the new <b>README.md</b> over README.md</li>
               <li>Copy <b>{title}.json</b> into <b>schemas/{title}.json</b></li>
+              <li>Copy the new <b>package.json</b> over package.json</li>
+              <li>Copy the new <b>model.ts</b> over model.ts</li>
               <li>Delete <b>schemas/BasicProfile.json</b></li>
-              <li>Update package.json with the new model details</li>
-              <li>Do some magic to make types/{title}.d.ts and src/model.ts appear</li>
             </ol>
             <h4>Finally</h4>
             <ol>
