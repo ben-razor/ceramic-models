@@ -16,38 +16,46 @@ function DataModels(props) {
     const [published, setPublished] = useState();
     const [schemaURL, setSchemaURL] = useState();
     const [basicProfile, setBasicProfile] = useState();
+    const [creatingEncodedModel, setCreatingEncodedModel] = useState();
+    const [error, setError] = useState();
     const ceramic = props.ceramic;
     const schema = props.schema;
     const setEncodedModel = props.setEncodedModel;
 
+
     useEffect(() => {
         if(ceramic && schema) {
             (async() => {
-                let modelName = schema.title;
-                const manager = new ModelManager(ceramic)
-                await manager.createSchema(modelName, schema);
-                
-                let modelJSON = manager.toJSON();
-                console.log('model json', modelJSON);
+                try {
+                    let modelName = schema.title;
+                    const manager = new ModelManager(ceramic)
+                    await manager.createSchema(modelName, schema);
+                    
+                    let modelJSON = manager.toJSON();
+                    console.log('model json', modelJSON);
 
-                setEncodedModel(modelJSON);
-                setBasicProfile(JSON.stringify(modelJSON));
+                    setEncodedModel(modelJSON);
+                    setBasicProfile(JSON.stringify(modelJSON));
+                }
+                catch(e) {
+                    console.log(e);
+                    setError(e.getMessage());
+                }
             })();
         }
     }, [ceramic, setPublished, schema, setEncodedModel]);
 
     return <div className="data-models">
-        <h2>Tests On Data Models</h2>
-        <div>
-            Published:
-            {JSON.stringify(published)}
-        </div>
-        <div>
-            Schema URL: {schemaURL}
-        </div>
-        <div>
-            Basic Profile: {basicProfile}
-        </div>
+        {
+            error && <div>
+                <h3>
+                    Error creating encoded model:
+                </h3>
+                <p>
+                    {error}
+                </p>
+            </div>
+        }
     </div>
 }
 

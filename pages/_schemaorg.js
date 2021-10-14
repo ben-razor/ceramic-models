@@ -751,12 +751,27 @@ function SchemaOrg() {
 
   function replaceTemplate(type, template, jsonSchema, extraInfo={}) {
     let title = jsonSchema['title'];
+    let titleLCFirst = title.charAt(0).toLowerCase() + title.slice(1);
     let description = jsonSchema['description'];
     let requiredFields = jsonSchema['required'] || [];
     let kebab = camelToKebabCase(title);
     let replacedTemplate = template.replaceAll('{{title}}', title);
+    replacedTemplate = replacedTemplate.replaceAll('{{titleLCFirst}}', titleLCFirst);
     replacedTemplate = replacedTemplate.replaceAll('{{slug}}', kebab);
+    replacedTemplate = replacedTemplate.replaceAll('{{kebab}}', kebab);
     replacedTemplate = replacedTemplate.replaceAll('{{description}}', description);
+
+    if(extraInfo.author) {
+      replacedTemplate = replacedTemplate.replaceAll('{{author}}', author);
+    }
+
+    if(extraInfo.version) {
+      replacedTemplate = replacedTemplate.replaceAll('{{version}}', version);
+    }
+
+    if(extraInfo.keywords) {
+      replacedTemplate = replacedTemplate.replaceAll('{{keywords}}', JSON.stringify(extraInfo.keywords));
+    }
 
     let properties = jsonSchema['properties'];
     let fields = [];
@@ -771,6 +786,12 @@ function SchemaOrg() {
       
       let propLine = `${name}|${desc}|${type}|${maxSize}|${required}|${example}|`;
       fields.push(propLine);
+    }
+
+    if(type === 'modelTS') {
+      if(extraInfo.encodedModel) {
+        replacedTemplate = replacedTemplate.replaceAll('{{encodedModel}}', JSON.stringify(extraInfo.encodedModel));
+      }
     }
 
     replacedTemplate = replacedTemplate.replaceAll('{{fields}}', fields.join('\n'));
@@ -799,7 +820,7 @@ function SchemaOrg() {
 
     let replacedTemplate = replaceTemplate('readme', template, jsonSchemaWithFieldsChosen);
     let replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithFieldsChosen);
-    let replacedModelTS = replaceTemplate('modelTemplate', packageJSONTemplate, jsonSchemaWithFieldsChosen, {
+    let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithFieldsChosen, {
       'encodedModel': encodedModel}
     );
 

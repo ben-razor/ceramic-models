@@ -13,61 +13,23 @@ import DataModels from './components/DataModels';
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 
 function Ceramic(props) {
-  const [testDoc, setTestDoc] = useState();
-  const [streamId, setStreamId] = useState();
   const [ceramic, setCeramic] = useState();
-  const [ethAddresses, setEthAddresses] = useState();
-  const [ethereum, setEthereum] = useState();
   const schema = props.schema;
   const setEncodedModel = props.setEncodedModel;
 
   useEffect(() => {
-    if(window.ethereum) {
-      setEthereum(window.ethereum);
-      (async() => {
-        try {
-          const addresses = await window.ethereum.request({ method: 'eth_requestAccounts'})
-          setEthAddresses(addresses);
-        }
-        catch(e) { 
-          console.log(e);
-        }
-      })();
-    }
-  }, []);
-
-  useEffect(() => {
-    if(ethereum && ethAddresses) {
       (async () => {
         const newCeramic = new CeramicClient(API_URL);
 
-        let providerMethod = 'did';
-        let resolver;
+        let resolver = {
+          ...KeyDIDResolver.getResolver(newCeramic),
+        }
 
-        if(providerMethod === 'did') {
-          resolver = {
-            ...KeyDIDResolver.getResolver(newCeramic),
-          }
-        }
-        else {
-          resolver = {
-            ...ThreeIdResolver.getResolver(newCeramic),
-          }
-        }
         const did = new DID({ resolver })
         newCeramic.did = did;
 
-        let provider;
-        if(providerMethod === 'did') {
-          const seed = randomBytes(32)
-          provider = new Ed25519Provider(seed);
-        }
-        else {
-          const threeIdConnect = new ThreeIdConnect()
-          const authProvider = new EthereumAuthProvider(ethereum, ethAddresses[0]);
-          await threeIdConnect.connect(authProvider);
-          provider = await threeIdConnect.getDidProvider();
-        }
+        const seed = randomBytes(32)
+        let provider = new Ed25519Provider(seed);
 
         newCeramic.did.setProvider(provider);
         console.log('auth start'); 
@@ -76,25 +38,11 @@ function Ceramic(props) {
 
         setCeramic(newCeramic);
       })();
-    }
-  }, [ethereum, ethAddresses]);
-
-  function getEthNeededPanel() {
-    return <div className="csn-eth-panel">
-      <div className="csn-eth-message">You need ethereum</div>
-      <div className="csn-eth-metamask-message">Get <a href="https://metamask.io/" target="_blank" rel="noreferrer">MetaMask</a></div>
-    </div>;
-  }
-
-  function getWaitingForEthPanel() {
-    return <div className="csn-no-eth-accounts">
-      Waiting for Ethereum accounts...
-    </div>;
-  }
+  }, []);
 
   function getAppPanel() {
     return <div className={styles.csnApp}>
-      <h1>Ceramic is loaded</h1>
+      Ceramic is loaded
       <div>
         <DataModels ceramic={ceramic} schema={schema} setEncodedModel={setEncodedModel} />
       </div>
@@ -110,19 +58,9 @@ function Ceramic(props) {
   return (
     <div className="csn-app">
       { 
-        ethereum ? 
-        (
-          ethAddresses ?  
-          (
-            ceramic ?
-            getAppPanel() : 
-            getWaitingForDIDPanel()
-          ) 
-          :
-          getWaitingForEthPanel() 
-        )
-        :
-        getEthNeededPanel()
+        ceramic ?
+        getAppPanel() : 
+        getWaitingForDIDPanel()
       }
     </div>
   
