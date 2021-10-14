@@ -47,6 +47,10 @@ function SchemaOrg() {
   const [modelTab, setModelTab] = useState('schema');
   const [ceramicEnabled, setCeramicEnabled] = useState();
   const [encodedModel, setEncodedModel] = useState();
+  const [author, setAuthor] = useState('Max Power');
+  const [version, setVersion] = useState('0.0.1');
+  const [keywords, setKeywords] = useState('ceramic, data, model');
+  const [replacedPackageJSON, setReplacedPackageJSON] = useState('');
 
   const [origTitle, setOrigTitle] = useState('');
   const [title, setTitle] = useState('');
@@ -88,6 +92,28 @@ function SchemaOrg() {
     }
   }, [selectedObject, data, options, idIndex, fieldIndex, origTitle]);
 
+  const copyObjectProperties = useCallback((origProperties, newProperties, fields) => {
+    let field = fields[0];
+
+    if(field && origProperties[field]) {
+      let origData = origProperties[field];
+
+      if(origData) {
+        newProperties[field] = {};
+        let newData = newProperties[field];
+
+        if(origData['type']) newData['type'] = origData['type'];
+        if(origData['format']) newData['format'] = origData['format'];
+        if(origData['description']) newData['description'] = origData['description'];
+        if(origData['properties']) {
+          newData['properties'] = {};
+        }
+
+        copyObjectProperties(origData.properties, newData.properties, fields.slice(1));
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if(jsonSchema) {
       let _jsonSchema = JSON.parse(JSON.stringify(jsonSchema));
@@ -117,29 +143,7 @@ function SchemaOrg() {
       setJSONSchemaWithFieldsChosen(_jsonSchema);
     }
 
-  }, [jsonSchema, selectedProperties, allEditedProperties, title, description ]);
-
-  const copyObjectProperties = function(origProperties, newProperties, fields) {
-    let field = fields[0];
-
-    if(field && origProperties[field]) {
-      let origData = origProperties[field];
-
-      if(origData) {
-        newProperties[field] = {};
-        let newData = newProperties[field];
-
-        if(origData['type']) newData['type'] = origData['type'];
-        if(origData['format']) newData['format'] = origData['format'];
-        if(origData['description']) newData['description'] = origData['description'];
-        if(origData['properties']) {
-          newData['properties'] = {};
-        }
-
-        copyObjectProperties(origData.properties, newData.properties, fields.slice(1));
-      }
-    }
-  }
+  }, [jsonSchema, selectedProperties, allEditedProperties, title, description, copyObjectProperties, showMainDescription ]);
 
   function overwriteSchemaProperties(schema, details) {
     let path = details.path;
@@ -601,7 +605,7 @@ function SchemaOrg() {
             Properties
           </div>
           <div className={styles.csnSchemaSettingControl}>
-            <input type="text" value={'{}'} disabled />
+            <input type="text" value={'{}'} disabled onChange={e => {}}/>
           </div>
         </div>
         <h4>Editing of sub objects is not implemented.</h4>
@@ -749,7 +753,7 @@ function SchemaOrg() {
     return <a href={href} target="_blank" rel="noreferrer">{text}</a>
   }
 
-  function replaceTemplate(type, template, jsonSchema, extraInfo={}) {
+  const replaceTemplate = useCallback((type, template, jsonSchema, extraInfo={}) => {
     let title = jsonSchema['title'];
     let titleLCFirst = title.charAt(0).toLowerCase() + title.slice(1);
     let description = jsonSchema['description'];
@@ -770,7 +774,7 @@ function SchemaOrg() {
     }
 
     if(extraInfo.keywords) {
-      replacedTemplate = replacedTemplate.replaceAll('{{keywords}}', JSON.stringify(extraInfo.keywords));
+      replacedTemplate = replacedTemplate.replaceAll('{{keywords_array}}', extraInfo.keywords);
     }
 
     let properties = jsonSchema['properties'];
@@ -790,14 +794,14 @@ function SchemaOrg() {
 
     if(type === 'modelTS') {
       if(extraInfo.encodedModel) {
-        replacedTemplate = replacedTemplate.replaceAll('{{encodedModel}}', JSON.stringify(extraInfo.encodedModel));
+        replacedTemplate = replacedTemplate.replaceAll('{{encodedModel}}', JSON.stringify(extraInfo.encodedModel, null, 2));
       }
     }
 
     replacedTemplate = replacedTemplate.replaceAll('{{fields}}', fields.join('\n'));
 
     return replacedTemplate;
-  }
+  }, [author, version]);
 
   function copyOutputToClipboard(e, type, extraInfo={}) {
     console.log('copy', type);
@@ -812,6 +816,21 @@ function SchemaOrg() {
     e.stopPropagation();
   }
 
+  useEffect(() => {
+    if(jsonSchemaWithFieldsChosen) {
+      let keywordArray = keywords.split(',').map(x => x.trim());
+      let keywordArrayJSON = JSON.stringify(keywordArray);
+      let extraInfo = {
+        'author': author,
+        'version': version,
+        'keywords': keywordArrayJSON
+      }
+      let _replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithFieldsChosen, extraInfo);
+      setReplacedPackageJSON(_replacedPackageJSON);
+    }
+
+  }, [ jsonSchemaWithFieldsChosen, setReplacedPackageJSON, author, version, keywords, replaceTemplate])
+
   function getCreateModelPage() {
     let kebab = camelToKebabCase(title);
 
@@ -819,7 +838,6 @@ function SchemaOrg() {
     console.log(packageJSONTemplate);
 
     let replacedTemplate = replaceTemplate('readme', template, jsonSchemaWithFieldsChosen);
-    let replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithFieldsChosen);
     let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithFieldsChosen, {
       'encodedModel': encodedModel}
     );
@@ -863,12 +881,21 @@ function SchemaOrg() {
                 </pre>
               </div>
               <div style={ { display: (modelTab === 'packageJSON' ? 'block' : 'none'), position: 'relative' }}>
-                <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
-                  <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+                <div className={styles.csnPackageJSONEditor}>
+                  <div className={styles.csnPackageJSONControls}>
+                    <input type="text" value={author} placeholder="Author" onChange={e => setAuthor(e.target.value)} />
+                    <input type="text" value={version} placeholder="Version" onChange={e => setVersion(e.target.value)} />
+                    <input type="text" value={keywords} placeholder="Keywords" onChange={e => setKeywords(e.target.value)} />
+                  </div>
+                  <div className={styles.csnPackageJSONViewer}>
+                    <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
+                      <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+                    </div>
+                    <pre className={styles.csnMarkdownDisplay} onClick={e => copyOutputToClipboard(e, 'packageJSON')}>
+                      {replacedPackageJSON}
+                    </pre>
+                  </div>
                 </div>
-                <pre className={styles.csnMarkdownDisplay} onClick={e => copyOutputToClipboard(e, 'packageJSON')}>
-                  {replacedPackageJSON}
-                </pre>
               </div>
               <div style={ { display: (modelTab === 'modelTS' ? 'block' : 'none'), position: 'relative' }}>
                 <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'modelTS')}>

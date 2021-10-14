@@ -284,3 +284,18 @@
     background-color: white;
     color: black;
 }
+
+.csnPackageJSONEditor {
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+}
+
+.csnPackageJSONControls {
+    padding: 0.5em;
+    display: flex;
+}
+
+.csnPackageJSONViewer {
+    position: relative;
+}
