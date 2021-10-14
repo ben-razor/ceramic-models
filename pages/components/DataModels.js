@@ -18,35 +18,23 @@ function DataModels(props) {
     const [basicProfile, setBasicProfile] = useState();
     const ceramic = props.ceramic;
     const schema = props.schema;
+    const setEncodedModel = props.setEncodedModel;
 
     useEffect(() => {
         if(ceramic && schema) {
             (async() => {
                 let modelName = schema.title;
                 const manager = new ModelManager(ceramic)
-                console.log('B CREATE SCHEMA')
                 await manager.createSchema(modelName, schema);
-                console.log('A CREATE SCHEMA') 
                 
                 let modelJSON = manager.toJSON();
                 console.log('model json', modelJSON);
 
-                /*
-                const publishedModel = await manager.toPublished();                 
-                setPublished(publishedModel);
-
-                const model = new DataModel({ ceramic,  model: publishedModel});
-                const schemaURL = model.getSchemaURL(modelName);
-                const dataStore = new DIDDataStore({ ceramic, model });
-                await dataStore.set('basicProfile', { record: 'content' }); 
-                const basicProfile = await dataStore.get('basicProfile');
-                */
-
-                // setSchemaURL(schemaURL);
+                setEncodedModel(modelJSON);
                 setBasicProfile(JSON.stringify(modelJSON));
             })();
         }
-    }, [ceramic, setPublished, schema]);
+    }, [ceramic, setPublished, schema, setEncodedModel]);
 
     return <div className="data-models">
         <h2>Tests On Data Models</h2>

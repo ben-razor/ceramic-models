@@ -46,6 +46,7 @@ function SchemaOrg() {
   const [selectedProperties, setSelectedProperties] = useState({});
   const [modelTab, setModelTab] = useState('schema');
   const [ceramicEnabled, setCeramicEnabled] = useState();
+  const [encodedModel, setEncodedModel] = useState();
 
   const [origTitle, setOrigTitle] = useState('');
   const [title, setTitle] = useState('');
@@ -748,7 +749,7 @@ function SchemaOrg() {
     return <a href={href} target="_blank" rel="noreferrer">{text}</a>
   }
 
-  function replaceMarkdownTemplate(template, jsonSchema) {
+  function replaceTemplate(type, template, jsonSchema, extraInfo={}) {
     let title = jsonSchema['title'];
     let description = jsonSchema['description'];
     let requiredFields = jsonSchema['required'] || [];
@@ -777,14 +778,14 @@ function SchemaOrg() {
     return replacedTemplate;
   }
 
-  function copyOutputToClipboard(e, type) {
+  function copyOutputToClipboard(e, type, extraInfo={}) {
     console.log('copy', type);
     if(type === 'schema') {
       let content = JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"');
       copyToClipboard(content);
     }
     else if(type === 'readme') {
-      let replacedTemplate = replaceMarkdownTemplate(template, jsonSchemaWithFieldsChosen);
+      let replacedTemplate = replaceTemplate(type, template, jsonSchemaWithFieldsChosen, extraInfo);
       copyToClipboard(replacedTemplate);
     }
     e.stopPropagation();
@@ -796,7 +797,11 @@ function SchemaOrg() {
     console.log(modelTemplate);
     console.log(packageJSONTemplate);
 
-    let replacedTemplate = replaceMarkdownTemplate(template, jsonSchemaWithFieldsChosen);
+    let replacedTemplate = replaceTemplate('readme', template, jsonSchemaWithFieldsChosen);
+    let replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithFieldsChosen);
+    let replacedModelTS = replaceTemplate('modelTemplate', packageJSONTemplate, jsonSchemaWithFieldsChosen, {
+      'encodedModel': encodedModel}
+    );
 
     let createModelPage = <div className={styles.csnSchemaPage}>
       <div>
@@ -815,6 +820,12 @@ function SchemaOrg() {
                 <div onClick={() => setModelTab('readme')} className={styles.csnModelTab + ' ' + (modelTab === 'readme' && styles.csnModelTabSelected)}>
                   README.md
                 </div>
+                <div onClick={() => setModelTab('packageJSON')} className={styles.csnModelTab + ' ' + (modelTab === 'packageJSON' && styles.csnModelTabSelected)}>
+                  package.json
+                </div>
+                <div onClick={() => setModelTab('modelTS')} className={styles.csnModelTab + ' ' + (modelTab === 'modelTS' && styles.csnModelTabSelected)}>
+                  model.ts
+                </div>
               </div>
               <div className={styles.csnModelPanel} style={ { display: (modelTab === 'schema' ? 'block' : 'none'), position: 'relative' }}>
                 <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'schema')}>
@@ -830,13 +841,29 @@ function SchemaOrg() {
                   {replacedTemplate}
                 </pre>
               </div>
+              <div style={ { display: (modelTab === 'packageJSON' ? 'block' : 'none'), position: 'relative' }}>
+                <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
+                  <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+                </div>
+                <pre className={styles.csnMarkdownDisplay} onClick={e => copyOutputToClipboard(e, 'packageJSON')}>
+                  {replacedPackageJSON}
+                </pre>
+              </div>
+              <div style={ { display: (modelTab === 'modelTS' ? 'block' : 'none'), position: 'relative' }}>
+                <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'modelTS')}>
+                  <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+                </div>
+                <pre className={styles.csnMarkdownDisplay} onClick={e => copyOutputToClipboard(e, 'modelTS')}>
+                  {replacedModelTS}
+                </pre>
+              </div>
             </div>
           </div>
           <div className={styles.csnModelControls}>
           
             <h3>Creating Your Data Model</h3>
 
-            <Ceramic schema={jsonSchemaWithFieldsChosen} />
+            <Ceramic schema={jsonSchemaWithFieldsChosen} setEncodedModel={setEncodedModel} />
 
             <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>

@@ -19,6 +19,7 @@ function Ceramic(props) {
   const [ethAddresses, setEthAddresses] = useState();
   const [ethereum, setEthereum] = useState();
   const schema = props.schema;
+  const setEncodedModel = props.setEncodedModel;
 
   useEffect(() => {
     if(window.ethereum) {
@@ -95,7 +96,7 @@ function Ceramic(props) {
     return <div className={styles.csnApp}>
       <h1>Ceramic is loaded</h1>
       <div>
-        <DataModels ceramic={ceramic} schema={schema} />
+        <DataModels ceramic={ceramic} schema={schema} setEncodedModel={setEncodedModel} />
       </div>
     </div>;
   }
