@@ -38,6 +38,15 @@ input, select, textarea {
   font-size: inherit;
 }
 
+input[type=text] {
+  line-height: 1.5em;
+  border-radius: 0.5em;
+  border: 0;
+  padding-left: 0.5em;
+  margin: 0.1em;
+  border: 1px solid white;
+}
+
 input[type=checkbox] {
   width: 1em;
   height: 1em;

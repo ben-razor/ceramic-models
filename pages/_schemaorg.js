@@ -47,9 +47,9 @@ function SchemaOrg() {
   const [modelTab, setModelTab] = useState('schema');
   const [ceramicEnabled, setCeramicEnabled] = useState();
   const [encodedModel, setEncodedModel] = useState();
-  const [author, setAuthor] = useState('Max Power');
-  const [version, setVersion] = useState('0.0.1');
-  const [keywords, setKeywords] = useState('ceramic, data, model');
+  const [author, setAuthor] = useState('');
+  const [version, setVersion] = useState('');
+  const [keywords, setKeywords] = useState('');
   const [replacedPackageJSON, setReplacedPackageJSON] = useState('');
 
   const [origTitle, setOrigTitle] = useState('');
@@ -899,7 +899,7 @@ function SchemaOrg() {
                 <div className={styles.csnPackageJSONEditor}>
                   <div className={styles.csnPackageJSONControls}>
                     <input type="text" value={author} placeholder="Author" onChange={e => setAuthor(e.target.value)} />
-                    <input type="text" value={version} placeholder="Version" onChange={e => setVersion(e.target.value)} />
+                    <input type="text" value={version} placeholder="Version (e.g. 0.0.1)" onChange={e => setVersion(e.target.value)} />
                     <input type="text" value={keywords} placeholder="Keywords" onChange={e => setKeywords(e.target.value)} />
                   </div>
                   <div className={styles.csnPackageJSONViewer}>
