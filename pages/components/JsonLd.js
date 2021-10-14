@@ -98,21 +98,24 @@ function getSubclassFields(startSubClass, data, options, context={}) {
     let initSubClassID = startSubClass['@id'];
     let initSubClassName = initSubClassID.split(':')[1];
 
-    let {baseItem, fields, subClass} = getObjectFeatures(initSubClassName, data, options);
+    let {baseItem, fields, subClasses} = getObjectFeatures(initSubClassName, data, options);
 
     context.subClassFields = {};
     context.subClassFields[initSubClassID] = fields;
 
     let allSubClassFields = fields;
 
-    let nextSubClass = subClass;
-    while(nextSubClass) {
-        let nextSubClassID = nextSubClass['@id'];
-        let nextSubClassName = nextSubClassID.split(':')[1];
-        let {baseItem: nextBaseItem, fields: nextFields, subClass: newNextSubclass} = getObjectFeatures(nextSubClassName, data, options);
-        allSubClassFields = allSubClassFields.concat(nextFields);
-        nextSubClass = newNextSubclass;
-        context.subClassFields[nextSubClassID] = nextFields;
+    for(let subClass of subClasses) {
+        let nextSubClass = subClass;
+        while(nextSubClass) {
+            let nextSubClassID = nextSubClass['@id'];
+            let nextSubClassName = nextSubClassID.split(':')[1];
+            let {baseItem: nextBaseItem, fields: nextFields, subClasses: newNextSubclasses} = getObjectFeatures(nextSubClassName, data, options);
+            allSubClassFields = allSubClassFields.concat(nextFields);
+            // TODO: There can be multiple base classes, this only supports the first one for the moment
+            nextSubClass = newNextSubclasses[0];
+            context.subClassFields[nextSubClassID] = nextFields;
+        }
     }
 
     return allSubClassFields;
@@ -150,8 +153,12 @@ export function getObjectFeatures(objectName, data, options, context={}) {
     }
 
     let subClass = baseItem['rdfs:subClassOf'];
+    let subClasses = subClass;
+    if(!Array.isArray(subClass)) {
+        subClasses = [subClass];
+    }
 
-    return { baseItem, fields, subClass };
+    return { baseItem, fields, subClasses };
 }
 
 /**
@@ -163,11 +170,13 @@ export function getObjectFeatures(objectName, data, options, context={}) {
  * @param {object} context        An object for passing info down the tree
  */
 export function jsonLdToJsonSchema(objectName, data, options, context={}) {
-    let {baseItem, fields: ownFields, subClass} = getObjectFeatures(objectName, data, options);
+    let {baseItem, fields: ownFields, subClasses} = getObjectFeatures(objectName, data, options);
 
     let fields = ownFields;
 
-    if(subClass) {
+    // TODO: This only supports one base class, there can be multiple
+    if(subClasses) {
+        let subClass = subClasses[0];
         if(subClass['@id']) {
             getSubclassFields(subClass, data, options, context);
 

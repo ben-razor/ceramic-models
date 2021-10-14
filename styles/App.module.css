@@ -125,6 +125,7 @@
 
 .csnSchemaSettingLabel {
     display: flex;
+    overflow: hidden;
     align-items: center;
     width: 50%;
 }
