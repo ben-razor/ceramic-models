@@ -28,8 +28,22 @@ function DataModels(props) {
             (async() => {
                 try {
                     let modelName = schema.title;
-                    const manager = new ModelManager(ceramic)
+                    let modelNameLCFirst = modelName.charAt(0).toLowerCase() + modelName.slice(1); 
+
+                    const manager = new ModelManager(ceramic);
                     await manager.createSchema(modelName, schema);
+
+                    const publishedModel  = await manager.toPublished();
+                    const model = new DataModel({ ceramic,  model: publishedModel });
+                    const schemaURL = model.getSchemaURL('BasicSkill');
+
+                    console.log('SCHEMA URL', schemaURL);
+                    let definition = {
+                        name: modelNameLCFirst,
+                        description: schema.description, 
+                        schema: schemaURL
+                    }
+                    await manager.createDefinition(modelNameLCFirst, definition);
                     
                     let modelJSON = manager.toJSON();
                     console.log('model json', modelJSON);
@@ -38,7 +52,7 @@ function DataModels(props) {
                 }
                 catch(e) {
                     console.log(e);
-                    setError(e.getMessage());
+                    setError(e.message);
                 }
             })();
         }
