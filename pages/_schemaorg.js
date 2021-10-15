@@ -36,6 +36,8 @@ function SchemaOrg() {
   const [selectedObject, setSelectedObject] = useState('');
   const [jsonSchema, setJSONSchema] = useState('');
   const [jsonSchemaWithFieldsChosen, setJSONSchemaWithFieldsChosen] = useState('');
+  const [jsonSchemaWithManualEdits, setJSONSchemaWithManualEdits] = useState('');
+  const [jsonSchemaEditingText, setJSONSchemaEditingText] = useState('');
   const [options, setOptions] = useState({ expanded: {}, subClassSelections: {} });
   const [subClassFields, setSubClassFields] = useState({});
   const [creatingModel, setCreatingModel] = useState(false);
@@ -51,6 +53,8 @@ function SchemaOrg() {
   const [version, setVersion] = useState('');
   const [keywords, setKeywords] = useState('');
   const [replacedPackageJSON, setReplacedPackageJSON] = useState('');
+  const [schemaManuallyEdited, setSchemaManuallyEdited] = useState(false);
+  const [schemaErrors, setSchemaErrors] = useState('');
 
   const [origTitle, setOrigTitle] = useState('');
   const [title, setTitle] = useState('');
@@ -114,6 +118,10 @@ function SchemaOrg() {
     }
   }, []);
 
+  const niceStringify = useCallback((json) => {
+    return JSON.stringify(json, null, 2).replace(/\\"/g, '"');
+  }, []);
+
   useEffect(() => {
     if(jsonSchema) {
       let _jsonSchema = JSON.parse(JSON.stringify(jsonSchema));
@@ -141,9 +149,10 @@ function SchemaOrg() {
       }
       
       setJSONSchemaWithFieldsChosen(_jsonSchema);
+      setJSONSchemaEditingText(niceStringify(_jsonSchema));
     }
 
-  }, [jsonSchema, selectedProperties, allEditedProperties, title, description, copyObjectProperties, showMainDescription ]);
+  }, [jsonSchema, selectedProperties, allEditedProperties, title, description, copyObjectProperties, showMainDescription, niceStringify ]);
 
   function overwriteSchemaProperties(schema, details) {
     let path = details.path;
@@ -345,6 +354,25 @@ function SchemaOrg() {
     }
   }, [editingField, jsonSchema, allEditedProperties, editingProperties.type])
 
+  useEffect(() => {
+    if(jsonSchemaEditingText) {
+      let jsonSchemaText = niceStringify(jsonSchemaWithFieldsChosen);
+
+      if(jsonSchemaEditingText != jsonSchemaText) {
+        let _jsonSchemaWithManualEdits;
+        try {
+          _jsonSchemaWithManualEdits = JSON.parse(jsonSchemaEditingText);
+          setSchemaManuallyEdited(true);
+          setSchemaErrors('');
+          setJSONSchemaWithManualEdits(_jsonSchemaWithManualEdits);
+        }
+        catch(e) {
+          setSchemaManuallyEdited(false);
+          setSchemaErrors(e.message);
+        }
+      }
+    }
+  }, [jsonSchemaWithFieldsChosen, jsonSchemaEditingText]);
 
   function initAllProperties(type) {
     let initProperties = {
@@ -484,9 +512,9 @@ function SchemaOrg() {
     return <div>
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
-        <div className={styles.csnJSONEditorModelDisplay} id="outputSchema" onClick={e => copyOutputToClipboard(e, 'schema')}>
+        <textarea className={styles.csnJSONEditorModelDisplay} id="outputSchema" value={jsonSchemaEditingText} onChange={e => setJSONSchemaEditingText(e.target.value)}>
           { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
-        </div>
+        </textarea>
       </div>
     </div>;
   }
@@ -806,7 +834,7 @@ function SchemaOrg() {
   function copyOutputToClipboard(e, type, extraInfo={}) {
     console.log('copy', type);
     if(type === 'schema') {
-      let content = JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"');
+      let content = jsonSchemaEditingText;
       copyToClipboard(content);
     }
     else if(type === 'readme') {
@@ -824,6 +852,7 @@ function SchemaOrg() {
       copyToClipboard(replacedModelTS);
     }
     e.stopPropagation();
+    e.preventDefault();
   }
 
   const replacePackageJSON = useCallback(() => {

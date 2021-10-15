@@ -217,6 +217,13 @@
     border: 1px solid white;
     padding: 0.5em;
     margin-left: 1em;
+    min-height: 20em;
+    color: white;
+}
+
+.csnJSONEditorModelDisplay:focus {
+    background-color: white;
+    color: black;
 }
 
 .csnModelTabs {
@@ -251,7 +258,7 @@
 
 .csnClipboard {
     position: absolute;
-    z-index: 2;
+    z-index: 10;
     width: 32px;
     height: 32px;
     right: 10px; 
