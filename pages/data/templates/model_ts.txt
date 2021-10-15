@@ -2,11 +2,8 @@ import type { ModelTypeAliases, EncodedManagedModel } from '@glazed/types'
 
 import type { {{title}} } from '../types/{{title}}'
 
-export type { AuthData, JWE, {{title}}, WrappedJWE } from '../types/{{title}}'
+export type { {{title}} } from '../types/{{title}}'
 
-export type ModelTypes = ModelTypeAliases<
-  { {{title}}: {{title}} },
-  { {{titleLCFirst}}: '{{title}}' }
->
+export type ModelTypes = ModelTypeAliases< {{{title}}: {{title}} }, { {{titleLCFirst}}: '{{title}}' }>
 
 export const model: EncodedManagedModel = {{encodedModel}} 

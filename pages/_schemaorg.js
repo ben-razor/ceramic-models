@@ -832,7 +832,12 @@ function SchemaOrg() {
 
     if(type === 'modelTS') {
       if(extraInfo.encodedModel) {
-        replacedTemplate = replacedTemplate.replaceAll('{{encodedModel}}', JSON.stringify(extraInfo.encodedModel, null, 2));
+        let encodedModelJSON = JSON.stringify(extraInfo.encodedModel, null, 2);
+        let unquotedEncodedModel = encodedModelJSON.replace(/"([^"]+)":/g, '$1:');
+        unquotedEncodedModel = unquotedEncodedModel.replaceAll('"', "'");
+        replacedTemplate = replacedTemplate.replaceAll('{{encodedModel}}', 
+          unquotedEncodedModel
+        );
       }
     }
 
@@ -980,6 +985,7 @@ function SchemaOrg() {
               <li>git clone git@github.com:your-username/datamodels.git</li>
               <li>git checkout -b {kebab}</li>
               <li>cd datamodels</li>
+              <li>yarn # pray for successful outcome</li>
               <li>cp -R <b>packages/identity-profile-basic</b> <b>packages/{kebab}</b></li>
             </ol>
             <h4>Updating</h4>
@@ -987,8 +993,9 @@ function SchemaOrg() {
               <li>cd <b>packages/{kebab}</b></li>
               <li>Copy the new <b>README.md</b> over README.md</li>
               <li>Copy <b>{title}.json</b> into <b>schemas/{title}.json</b></li>
+              <li>yarn types</li>
               <li>Copy the new <b>package.json</b> over package.json</li>
-              <li>Copy the new <b>model.ts</b> over model.ts</li>
+              <li>Copy the new <b>model.ts</b> over src/model.ts</li>
               <li>Delete <b>schemas/BasicProfile.json</b></li>
             </ol>
             <h4>Finally</h4>

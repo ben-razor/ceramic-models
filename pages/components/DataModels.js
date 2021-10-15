@@ -35,7 +35,6 @@ function DataModels(props) {
                     console.log('model json', modelJSON);
 
                     setEncodedModel(modelJSON);
-                    setBasicProfile(JSON.stringify(modelJSON));
                 }
                 catch(e) {
                     console.log(e);
