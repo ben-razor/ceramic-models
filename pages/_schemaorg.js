@@ -266,6 +266,8 @@ function SchemaOrg() {
 
   function goBackEditModel() {
     setCreatingModel(false);
+    setJSONSchemaEditingText(niceStringify(jsonSchema));
+    setSchemaErrors('');
   }
 
   function goCreateModel() {
@@ -358,21 +360,28 @@ function SchemaOrg() {
     if(jsonSchemaEditingText) {
       let jsonSchemaText = niceStringify(jsonSchemaWithFieldsChosen);
 
-      if(jsonSchemaEditingText != jsonSchemaText) {
-        let _jsonSchemaWithManualEdits;
-        try {
-          _jsonSchemaWithManualEdits = JSON.parse(jsonSchemaEditingText);
-          setSchemaManuallyEdited(true);
-          setSchemaErrors('');
-          setJSONSchemaWithManualEdits(_jsonSchemaWithManualEdits);
-        }
-        catch(e) {
-          setSchemaManuallyEdited(false);
-          setSchemaErrors(e.message);
-        }
+      try {
+        let _jsonSchemaWithManualEdits = JSON.parse(jsonSchemaEditingText);
+        setSchemaManuallyEdited(true);
+        setSchemaErrors();
+      }
+      catch(e) {
+        setSchemaManuallyEdited(false);
+        setSchemaErrors(e.message);
       }
     }
-  }, [jsonSchemaWithFieldsChosen, jsonSchemaEditingText]);
+  }, [jsonSchemaWithFieldsChosen, jsonSchemaEditingText, niceStringify]);
+
+  const updateModel = function(e) {
+    try {
+      let _jsonSchemaWithManualEdits = JSON.parse(jsonSchemaEditingText);
+      setJSONSchemaWithManualEdits(_jsonSchemaWithManualEdits);
+    }
+    catch(e) {
+      setSchemaManuallyEdited(false);
+      setSchemaErrors(e.message);
+    }
+  }
 
   function initAllProperties(type) {
     let initProperties = {
@@ -502,16 +511,16 @@ function SchemaOrg() {
   }
   
   function displaySchemaForCreateModel(jsonSchema, options={}) {
-    let propertyUI = [];
-
-    let context = { 
-      recursionLevel: 0,
-      recursionPath: []
-    };
-
-    return <div>
+    return <div className={styles.csnJSONEditorContainer}>
+      {schemaErrors &&
+        <div className={styles.csnJSONEditorErrors}>
+          {schemaErrors}
+        </div>
+      }
       <div className={styles.csnJSONEditor}>
-        <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
+        <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'schema')}>
+          <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
+        </div>
         <textarea className={styles.csnJSONEditorModelDisplay} id="outputSchema" value={jsonSchemaEditingText} onChange={e => setJSONSchemaEditingText(e.target.value)}>
           { JSON.stringify(jsonSchema, null, 2).replace(/\\"/g, '"') } 
         </textarea>
@@ -894,7 +903,15 @@ function SchemaOrg() {
         <div className={styles.csnModelContent}>
           <div className={styles.csnModelDisplay}>
             <div className={styles.csnJSON}>
-              <h3>Data Model: {title}</h3>
+              <div className={styles.csnModelDisplayHeading}>
+                <h3>Data Model: {title}</h3>
+
+                <div className={styles.csnModelDispayHeadingControls}>
+                  { (schemaManuallyEdited && !schemaErrors) &&
+                    <button onClick={e => updateModel(e)}>Update Model</button>
+                  }
+                </div>
+              </div>
               <div>{description}</div>
               <div className={styles.csnModelTabs}>
                 <div onClick={() => setModelTab('schema')} className={styles.csnModelTab + ' ' + (modelTab === 'schema' && styles.csnModelTabSelected)}>
@@ -911,9 +928,6 @@ function SchemaOrg() {
                 </div>
               </div>
               <div className={styles.csnModelPanel} style={ { display: (modelTab === 'schema' ? 'block' : 'none'), position: 'relative' }}>
-                <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'schema')}>
-                  <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
-                </div>
                 { displaySchemaForCreateModel(jsonSchemaWithFieldsChosen, options) }
               </div>
               <div style={ { display: (modelTab === 'readme' ? 'block' : 'none'), position: 'relative' }}>

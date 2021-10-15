@@ -169,6 +169,7 @@
 
 .csnJSONEditor {
     display: flex;
+    position: relative;
     margin-top: 1em;
 }
 
@@ -217,7 +218,7 @@
     border: 1px solid white;
     padding: 0.5em;
     margin-left: 1em;
-    min-height: 20em;
+    min-height: 30em;
     color: white;
 }
 
@@ -261,7 +262,7 @@
     z-index: 10;
     width: 32px;
     height: 32px;
-    right: 10px; 
+    right: 20px; 
     top: 15px;
 }
 
@@ -306,4 +307,28 @@
 
 .csnPackageJSONViewer {
     position: relative;
+}
+
+.csnModelDisplayHeading {
+    display: flex;
+}
+
+.csnModelDispayHeadingControls {
+    margin-left: auto;
+}
+
+.csnJSONEditorErrors {
+    display: flex;
+    margin-left: 1em;
+    margin-top: 0.2em;
+    background-color: black;
+    border: 1px solid red;
+    border-radius: 0.5em;
+    color: red;
+    padding: 0.5em;
+}
+
+.csnJSONEditorContainer {
+    display: flex;
+    flex-direction: column;
 }
