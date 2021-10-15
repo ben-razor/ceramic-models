@@ -2,7 +2,7 @@ import styles from '../styles/App.module.css'
 import { useEffect, useState, useCallback, Fragment } from 'react';
 import Image from 'next/image';
 import SearchPage from './components/SearchPage';
-import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema, jstr } from './components/JsonLd';
+import { getSchema, getByType, transformObject, matchItemOrArray, getObjectFeatures, jsonLdToJsonSchema, jstr } from '../lib/JsonLd';
 import camelToKebabCase from "camel-to-kebab";
 import template from './data/markdown/template.md';
 import modelTemplate from './data/templates/model_ts.txt';

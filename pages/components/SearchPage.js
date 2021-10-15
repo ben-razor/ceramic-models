@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, Fragment } from 'react';
-import { getByType, matchItemOrArray, jstr } from './JsonLd';
+import { getByType, matchItemOrArray, jstr } from '../../lib/JsonLd';
 
 function SearchPage(props) {
   let data = props.data;

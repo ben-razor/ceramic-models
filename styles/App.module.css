@@ -55,7 +55,7 @@
     width: 22%;
     padding: 0.2em 0.5em;
     margin: 0.3em;
-    background-color: hsl(19deg, 100%, 50%);
+    background-color: hsl(20deg, 95%, 40%);
     background-image: linear-gradient(transparent 0%, hsl(19deg, 100%, 60%) 50%, transparent 100%);
     box-shadow: 4px 0px white;
     box-sizing: border-box;
