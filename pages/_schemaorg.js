@@ -149,6 +149,7 @@ function SchemaOrg() {
       }
       
       setJSONSchemaWithFieldsChosen(_jsonSchema);
+      setJSONSchemaWithManualEdits(_jsonSchema);
       setJSONSchemaEditingText(niceStringify(_jsonSchema));
     }
 
@@ -358,10 +359,9 @@ function SchemaOrg() {
 
   useEffect(() => {
     if(jsonSchemaEditingText) {
-      let jsonSchemaText = niceStringify(jsonSchemaWithFieldsChosen);
 
       try {
-        let _jsonSchemaWithManualEdits = JSON.parse(jsonSchemaEditingText);
+        JSON.parse(jsonSchemaEditingText);
         setSchemaManuallyEdited(true);
         setSchemaErrors();
       }
@@ -376,6 +376,7 @@ function SchemaOrg() {
     try {
       let _jsonSchemaWithManualEdits = JSON.parse(jsonSchemaEditingText);
       setJSONSchemaWithManualEdits(_jsonSchemaWithManualEdits);
+      setSchemaManuallyEdited(false);
     }
     catch(e) {
       setSchemaManuallyEdited(false);
@@ -500,7 +501,7 @@ function SchemaOrg() {
       <div className={styles.csnJSONEditor}>
         <div className={styles.csnJSONPropEditor}>{propertyUI}</div>
         <div className={styles.csnJSONEditorDisplay}>
-          { JSON.stringify(jsonSchemaWithFieldsChosen, null, 2).replace(/\\"/g, '"') } 
+          { JSON.stringify(jsonSchemaWithManualEdits, null, 2).replace(/\\"/g, '"') } 
         </div>
       </div>
     </div>;
@@ -847,7 +848,7 @@ function SchemaOrg() {
       copyToClipboard(content);
     }
     else if(type === 'readme') {
-      let replacedTemplate = replaceTemplate(type, template, jsonSchemaWithFieldsChosen, extraInfo);
+      let replacedTemplate = replaceTemplate(type, template, jsonSchemaWithManualEdits, extraInfo);
       copyToClipboard(replacedTemplate);
     }
     else if(type === 'packageJSON') {
@@ -855,7 +856,7 @@ function SchemaOrg() {
       copyToClipboard(replacedTemplate);
     }
     else if(type === 'modelTS') {
-      let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithFieldsChosen, {
+      let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithManualEdits, {
         'encodedModel': encodedModel}
       );
       copyToClipboard(replacedModelTS);
@@ -872,17 +873,17 @@ function SchemaOrg() {
         'version': version,
         'keywords': keywordArrayJSON
       }
-      let _replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithFieldsChosen, extraInfo);
+      let _replacedPackageJSON = replaceTemplate('packageJSON', packageJSONTemplate, jsonSchemaWithManualEdits, extraInfo);
       return _replacedPackageJSON;
-  }, [author, version, jsonSchemaWithFieldsChosen, keywords, replaceTemplate]);
+  }, [author, version, jsonSchemaWithManualEdits, keywords, replaceTemplate]);
 
   useEffect(() => {
-    if(jsonSchemaWithFieldsChosen) {
+    if(jsonSchemaWithManualEdits) {
       let _replacedPackageJSON = replacePackageJSON();
       setReplacedPackageJSON(_replacedPackageJSON);
     }
 
-  }, [ jsonSchemaWithFieldsChosen, replacePackageJSON, setReplacedPackageJSON, author, version, keywords, replaceTemplate])
+  }, [ jsonSchemaWithManualEdits, replacePackageJSON, setReplacedPackageJSON, author, version, keywords, replaceTemplate])
 
   function getCreateModelPage() {
     let kebab = camelToKebabCase(title);
@@ -890,8 +891,8 @@ function SchemaOrg() {
     console.log(modelTemplate);
     console.log(packageJSONTemplate);
 
-    let replacedTemplate = replaceTemplate('readme', template, jsonSchemaWithFieldsChosen);
-    let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithFieldsChosen, {
+    let replacedTemplate = replaceTemplate('readme', template, jsonSchemaWithManualEdits);
+    let replacedModelTS = replaceTemplate('modelTS', modelTemplate, jsonSchemaWithManualEdits, {
       'encodedModel': encodedModel}
     );
 
@@ -928,7 +929,7 @@ function SchemaOrg() {
                 </div>
               </div>
               <div className={styles.csnModelPanel} style={ { display: (modelTab === 'schema' ? 'block' : 'none'), position: 'relative' }}>
-                { displaySchemaForCreateModel(jsonSchemaWithFieldsChosen, options) }
+                { displaySchemaForCreateModel(jsonSchemaWithManualEdits, options) }
               </div>
               <div style={ { display: (modelTab === 'readme' ? 'block' : 'none'), position: 'relative' }}>
                 <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
@@ -969,7 +970,7 @@ function SchemaOrg() {
           
             <h3>Creating Your Data Model</h3>
 
-            <Ceramic schema={jsonSchemaWithFieldsChosen} setEncodedModel={setEncodedModel} />
+            <Ceramic schema={jsonSchemaWithManualEdits} setEncodedModel={setEncodedModel} />
 
             <div><b>(Prerequisite: Know git fork, clone, branch, and pull request)</b></div>
             <h4>Initializing</h4>
