@@ -952,7 +952,7 @@ function SchemaOrg() {
                     <input type="text" value={keywords} placeholder="Keywords" onChange={e => setKeywords(e.target.value)} />
                   </div>
                   <div className={styles.csnPackageJSONViewer}>
-                    <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'readme')}>
+                    <div className={styles.csnClipboard} onClick={e => copyOutputToClipboard(e, 'packageJSON')}>
                       <Image alt="Clipboard Icon" title="Copy to clipboard" src="/azulejo/copy-50x50-1.png" width="32" height="32" />
                     </div>
                     <pre className={styles.csnMarkdownDisplay} onClick={e => copyOutputToClipboard(e, 'packageJSON')}>
