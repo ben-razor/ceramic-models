@@ -31,11 +31,14 @@ function DataModels(props) {
                     let modelNameLCFirst = modelName.charAt(0).toLowerCase() + modelName.slice(1); 
 
                     const manager = new ModelManager(ceramic);
-                    await manager.createSchema(modelName, schema);
+                    console.log('Pre create');
+                    await manager.createSchema(modelName, JSON.stringify(schema));
 
+                    console.log('Pre publish');
                     const publishedModel  = await manager.toPublished();
                     const model = new DataModel({ ceramic,  model: publishedModel });
                     const schemaURL = model.getSchemaURL('BasicSkill');
+                    console.log('post getSchema');
 
                     console.log('SCHEMA URL', schemaURL);
                     let definition = {
