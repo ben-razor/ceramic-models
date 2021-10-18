@@ -8,6 +8,17 @@ Check out the [Demo Video](https://youtu.be/2beg-w2BoBc).
 
 Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/ceramic/81/100026724)
 
+
+## Limitations
+
+Only the basic features from Schema.org are currently implemented. Enhancements would include:
+
+* Adding upport for nested objects
+* Generation of arrays / collections of the created schema object
+* Multiple subclasses not fully implemented
+* Multiple options for type not implemented
+* Enum types and more advanced JSON schema features not implemented
+
 ## About Ceramic
 
 Ceramic is a platform for storing and sharing streams of data.
@@ -27,16 +38,6 @@ Ceramic uses **Data Models** to allow new applications to build on existing data
 Data Models are essentially a collection of schemas, which describe the format of data that can be stored, along with some metadata such as a human readable name to make interacting with the schemas easier.
 
 They are wrapped in npm packages so that they can be easily reused within different applications.
-
-## Limitations
-
-Only the basic features from Schema.org are currently implemented. Enhancements would include:
-
-* Adding upport for nested objects
-* Generation of arrays / collections of the created schema object
-* Multiple subclasses not fully implemented
-* Multiple options for type not implemented
-* Enum types and more advanced JSON schema features not implemented
 
 ## Useful Links
 
