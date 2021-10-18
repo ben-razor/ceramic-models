@@ -1,8 +1,10 @@
-# Ceramic Data Models
+# Azulejo - Schema.org -> JSON Schema -> Ceramic Data Models
 
-This repository expolores [Data Models](https://developers.ceramic.network/tools/glaze/datamodel/) of the [Ceramic Network](https://ceramic.network/).
+This repository presents an application for creating [Data Models](https://developers.ceramic.network/tools/glaze/datamodel/) for [Ceramic Network](https://ceramic.network/) using data from Schema.org to bootstrap the process.
 
-## Using Ceramic
+Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/ceramic/81/100026724)
+
+## About Ceramic
 
 Ceramic is a platform for storing and sharing streams of data.
 
