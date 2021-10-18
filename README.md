@@ -28,6 +28,16 @@ Data Models are essentially a collection of schemas, which describe the format o
 
 They are wrapped in npm packages so that they can be easily reused within different applications.
 
+## Limitations
+
+Only the basic features from Schema.org are currently implemented. Enhancements would include:
+
+* Adding upport for nested objects
+* Generation of arrays / collections of the created schema object
+* Multiple subclasses not fully implemented
+* Multiple options for type not implemented
+* Enum types and more advanced JSON schema features not implemented
+
 ## Useful Links
 
 ### Ceramic
