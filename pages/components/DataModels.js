@@ -22,7 +22,6 @@ function DataModels(props) {
     const schema = props.schema;
     const setEncodedModel = props.setEncodedModel;
 
-
     useEffect(() => {
         if(ceramic && schema) {
             (async() => {
@@ -31,7 +30,7 @@ function DataModels(props) {
                     let modelNameLCFirst = modelName.charAt(0).toLowerCase() + modelName.slice(1); 
 
                     const manager = new ModelManager(ceramic);
-                    await manager.createSchema(modelName, JSON.stringify(schema));
+                    await manager.createSchema(modelName, schema);
 
                     const publishedModel  = await manager.toPublished();
                     const model = new DataModel({ ceramic,  model: publishedModel });

@@ -815,7 +815,17 @@ function SchemaOrg() {
       replacedTemplate = replacedTemplate.replaceAll('{{keywords_array}}', extraInfo.keywords);
     }
 
-    let properties = jsonSchema['properties'];
+    let properties;
+
+    if(jsonSchema['definitions'] && Object.keys(jsonSchema['definitions']).length) {
+      // TODO: Support multiple definitions
+      let definitionKey = Object.keys(jsonSchema['definitions'])[0];
+      properties = jsonSchema['definitions'][definitionKey]['properties'];
+    }
+    else {
+      properties = jsonSchema['properties'];
+    }
+
     let fields = [];
 
     for(let name of Object.keys(properties)) {
