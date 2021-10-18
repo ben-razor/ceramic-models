@@ -332,3 +332,14 @@
     display: flex;
     flex-direction: column;
 }
+
+.csnMenu {
+    position: absolute;
+    right: 6em;
+    top: 1em;
+    color: darkorange;
+}
+
+.csnMenuItem {
+
+}

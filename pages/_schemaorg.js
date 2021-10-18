@@ -1045,6 +1045,11 @@ function SchemaOrg() {
   return (
     <div className={styles.csnApp}> 
       <div className={styles.csnHeader}>
+        <div className={styles.csnMenu}>
+          <div className={styles.csnMenuItem}>
+            <a href="https://azulejo-docs.web.app/">Documentation</a>
+          </div>
+        </div>
         <h1 className={styles.csnTitle}>
           AZULEJO
         </h1>
