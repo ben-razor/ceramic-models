@@ -535,15 +535,14 @@ function SchemaOrg() {
     setEditingProperties(_editingProperties);
   }
 
-  useEffect(() => {
-    console.log('type changed');
-    let newType = editingProperties.type;
-
+  function changeEditingPropertyType(type) {
+    console.log('type changed: ', type);
     if(!allEditedProperties[editingField]) {
-      
+      console.log('No edited properties so they need creating')
+      let _editingProperties = initAllProperties(type);
+      setEditingProperties(_editingProperties);
     }
-
-  }, [editingProperties.type])
+  }
 
   function getPropertyEditFields(type) {
     let editFields;
@@ -741,7 +740,7 @@ function SchemaOrg() {
                       Type
                     </div>
                     <div className={styles.csnSchemaSettingControl}>
-                      <select value={editingProperties.type} onChange={e => handlePropertyEdited('type', e.target.value)}>
+                      <select value={editingProperties.type} onChange={e => changeEditingPropertyType(e.target.value)}>
                         <option value="string">String</option>
                         <option value="number">Number</option>
                         <option value="integer">Integer</option>
