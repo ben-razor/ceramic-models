@@ -342,22 +342,6 @@ function SchemaOrg() {
   }, [editingField, jsonSchema, allEditedProperties])
 
   useEffect(() => {
-    if(editingField && editingProperties.type) {
-
-      if(allEditedProperties[editingField]) {
-        setEditingProperties({...allEditedProperties[editingField]});
-      }
-      else {
-        let currentProperties = jsonSchema.properties[editingField];
-        if(currentProperties) {
-          let initProperties = initAllProperties(editingProperties.type);
-          setEditingProperties(initProperties);
-        }
-      }
-    }
-  }, [editingField, jsonSchema, allEditedProperties, editingProperties.type])
-
-  useEffect(() => {
     if(jsonSchemaEditingText) {
 
       try {
