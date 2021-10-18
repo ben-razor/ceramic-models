@@ -1,4 +1,4 @@
-# Azulejo - Schema.org | JSON Schema | Ceramic Data Models
+# Azulejo - Schema.org | Ceramic Data Models
 
 This repository presents an application for creating [Data Models](https://developers.ceramic.network/tools/glaze/datamodel/) for [Ceramic Network](https://ceramic.network/) using data from Schema.org to bootstrap the process.
 
