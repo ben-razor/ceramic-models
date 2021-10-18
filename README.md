@@ -13,7 +13,7 @@ Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/cerami
 
 Only the basic features from Schema.org are currently implemented. Enhancements would include:
 
-* Adding upport for nested objects
+* Adding support for nested objects
 * Generation of arrays / collections of the created schema object
 * Multiple subclasses not fully implemented
 * Multiple options for type not implemented
