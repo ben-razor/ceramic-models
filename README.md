@@ -6,8 +6,9 @@ Try the [Online Demo](https://ceramic-models.vercel.app/)
 
 Check out the [Demo Video](https://youtu.be/2beg-w2BoBc).
 
-Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/ceramic/81/100026724)
+View the [Documentation](https://azulejo-docs.web.app/docs/azulejo/)
 
+Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/ceramic/81/100026724)
 
 ## Limitations
 
