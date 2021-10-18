@@ -2,6 +2,8 @@
 
 This repository presents an application for creating [Data Models](https://developers.ceramic.network/tools/glaze/datamodel/) for [Ceramic Network](https://ceramic.network/) using data from Schema.org to bootstrap the process.
 
+Check out the [Demo Video](https://youtu.be/2beg-w2BoBc).
+
 Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/ceramic/81/100026724)
 
 ## About Ceramic
