@@ -344,7 +344,7 @@ function SchemaOrg() {
   useEffect(() => {
     if(editingField && editingProperties.type) {
 
-      if(allEditedProperties[editingField] && allEditedProperties[editingField].type === editingProperties.type) {
+      if(allEditedProperties[editingField]) {
         setEditingProperties({...allEditedProperties[editingField]});
       }
       else {
@@ -577,6 +577,23 @@ function SchemaOrg() {
 
         <div className={styles.csnSchemaSettingRow}>
           <div className={styles.csnSchemaSettingLabel}>
+            Format
+          </div>
+          <div className={styles.csnSchemaSettingControl}>
+            <select value={editingProperties.format} onChange={e => handlePropertyEdited('format', e.target.value)}>
+              <option value="">None</option>
+              <option value="date-time">date-time</option>
+              <option value="uri">uri</option>
+              <option value="email">email</option>
+              <option value="hostvalue">hostvalue</option>
+              <option value="ipv4">ipv4 address</option>
+              <option value="ipv6">ipv6 address</option>
+            </select>
+          </div>
+        </div>
+
+        <div className={styles.csnSchemaSettingRow}>
+          <div className={styles.csnSchemaSettingLabel}>
             MinLength 
           </div>
           <div className={styles.csnSchemaSettingControl}>
@@ -694,6 +711,8 @@ function SchemaOrg() {
   function getSchemaPage() {
     let currentProperties = getCurrentProperties(editingField);
 
+    console.log('CP', editingProperties);
+    console.log('type', editingProperties.type);
     let schemaPage = <div className={styles.csnSchemaPage}>
       <div>
         <div className={styles.csnControlsPanel}>
@@ -722,20 +741,6 @@ function SchemaOrg() {
 
               <h3>Use Sub Class</h3>
               { getSubClassSelector() }
-
-              {/*
-                <div className={styles.csnSchemaSettingRow}>
-                  <div className={styles.csnSchemaSettingLabel}>
-                    Recursion levels:
-                  </div>
-                  <div className={styles.csnSchemaSettingControl}>
-                    <select value={recursionLevels} onChange={e => changeSettingRecursionLevels(e.target.value)}>
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                    </select>
-                  </div>
-                </div>
-              */}
 
             </form>
 
@@ -1047,7 +1052,7 @@ function SchemaOrg() {
       <div className={styles.csnHeader}>
         <div className={styles.csnMenu}>
           <div className={styles.csnMenuItem}>
-            <a href="https://azulejo-docs.web.app/">Documentation</a>
+            <a href="https://azulejo-docs.web.app/" target="_blank" rel="noreferrer">Documentation</a>
           </div>
         </div>
         <h1 className={styles.csnTitle}>
