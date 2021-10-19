@@ -8,6 +8,7 @@ import { TileDocument } from '@ceramicnetwork/stream-tile'
 import { DID } from 'dids'
 import DataModels from './components/DataModels';
 import SchemaOrg from './_schemaorg';
+import Head from 'next/head'
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 
@@ -15,6 +16,10 @@ function MyApp() {
 
   return (
     <div className="csn-app">
+      <Head>
+        <title>Azulejo - Ceramic Data Model Creator</title>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
       <SchemaOrg />
     </div>
   
