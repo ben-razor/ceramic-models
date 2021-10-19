@@ -47,6 +47,9 @@ function SearchPage(props) {
   }
  
   function getTypeSearchPanel() {
+    let maxRecords = 100;
+    let numDisplayed = 0;
+
     let typeSearchResultsUI = [];
     for(let val of typeSearchResults) {
       let id = val['@id'];
@@ -67,8 +70,19 @@ function SearchPage(props) {
           </div>
         </div>
       )
+
+      if(++numDisplayed >= maxRecords) {
+        break;
+      }
     }
-    let foundResults = typeSearchResults.length > 0;
+
+    if(numDisplayed === maxRecords) {
+      typeSearchResultsUI.push(
+        <div className={styles.maxRecordsMessage}>
+          Maximum of {maxRecords} displayed
+        </div>
+      )
+    }
 
     return <div className={styles.sorgTypeSearchPanel}>
       <div>

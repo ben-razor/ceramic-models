@@ -146,7 +146,7 @@ function SchemaOrg() {
         delete _jsonSchema['description'];
       }
       else {
-        _jsonSchema['description'] = _jsonSchema['description'].substr(0, 200);
+        _jsonSchema['description'] = _jsonSchema['description'];
       }
       
       setJSONSchemaWithFieldsChosen(_jsonSchema);
