@@ -8,6 +8,7 @@ import template from './data/markdown/template.md';
 import modelTemplate from './data/templates/model_ts.txt';
 import packageJSONTemplate from './data/templates/package_json.txt';
 import Ceramic from './Ceramic';
+import sanitizeHtml from 'sanitize-html';
 
 const API_URL = 'https://ceramic-clay.3boxlabs.com';
 const MAX_RESULTS = 20;
@@ -237,7 +238,6 @@ function SchemaOrg() {
   }
 
   function selectObject(name) {
-    console.log(name);
     setSelectedObject(name);
   }
 
@@ -382,6 +382,7 @@ function SchemaOrg() {
   function processDescription(description) {
     if(description) {
       description = description.replace(/[\\]+/g," ")
+      description = sanitizeHtml(description, {allowedTags: []}).trim();
     }
     return description;
   }
@@ -536,9 +537,7 @@ function SchemaOrg() {
   }
 
   function changeEditingPropertyType(type) {
-    console.log('type changed: ', type);
     if(!allEditedProperties[editingField]) {
-      console.log('No edited properties so they need creating')
       let _editingProperties = initAllProperties(type);
       setEditingProperties(_editingProperties);
     }
@@ -694,8 +693,6 @@ function SchemaOrg() {
   function getSchemaPage() {
     let currentProperties = getCurrentProperties(editingField);
 
-    console.log('CP', editingProperties);
-    console.log('type', editingProperties.type);
     let schemaPage = <div className={styles.csnSchemaPage}>
       <div>
         <div className={styles.csnControlsPanel}>
