@@ -8,6 +8,8 @@ Check out the [Demo Video](https://youtu.be/2beg-w2BoBc).
 
 View the [Documentation](https://azulejo-docs.web.app/docs/azulejo/)
 
+View the documentation source in the [Documentation Repository](https://github.com/ben-razor/azulejo-docs)
+
 Created for a [Gitcoin Hackathon](https://gitcoin.co/issue/ceramicnetwork/ceramic/81/100026724)
 
 ## Limitations
