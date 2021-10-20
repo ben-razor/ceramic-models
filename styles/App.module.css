@@ -26,7 +26,7 @@
 .csnContent {
     width: 90%;
     min-height: 70vh;
-    background-color: hsla(210, 40%, 20%, 0.6);
+    background-color: hsla(210, 100%, 20%, 0.6);
     box-shadow: 0px 10px 10px hsl(0, 0%, 50%);
     margin: auto;
     border-radius: 0.5em;
@@ -337,9 +337,12 @@
     position: absolute;
     right: 6em;
     top: 1em;
-    color: darkorange;
 }
 
 .csnMenuItem {
 
+}
+
+.csnMenuLink {
+    color: hsl(13deg, 90%, 50%);
 }

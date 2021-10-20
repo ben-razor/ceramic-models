@@ -1032,7 +1032,7 @@ function SchemaOrg() {
       <div className={styles.csnHeader}>
         <div className={styles.csnMenu}>
           <div className={styles.csnMenuItem}>
-            <a href="https://azulejo-docs.web.app/" target="_blank" rel="noreferrer">Documentation</a>
+            <a className={styles.csnMenuLink} href="https://azulejo-docs.web.app/" target="_blank" rel="noreferrer">Documentation</a>
           </div>
         </div>
         <h1 className={styles.csnTitle}>
